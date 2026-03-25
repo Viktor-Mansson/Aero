@@ -10,22 +10,51 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class Game extends AppCompatActivity implements SensorEventListener {
 
-    SensorManager sensorManager;
+    //sensors
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
     //sound effects
-    SoundPool soundPool;
+    private SoundPool soundPool;
     //background music
-    MediaPlayer mediaPlayer;
+    private MediaPlayer mediaPlayer;
 
-    Sensor accelerometer;
+    //xml references
+    private TextView score_view;
+    private TextView throw_instruction_view;
+    private ImageView plane_view;
+    private ConstraintLayout layout;
+    private ImageView[] clouds;
+
+    private float ALPHA = 0.8f;
+    //change according to how hard you have to throw
+    private double FORCE_THRESHHOLD = 30;
+
+    private float[] gravity = new float[3];
+    private float x_prev = 0f;
+    private float y_prev = 0f;
+    private float z_prev = 0f;
+    private float x_max = 0f;
+    private float y_max = 0f;
+    private float z_max = 0f;
+    private boolean game_started = false;
+    private long start_time = 0;
+    ScoreManager scoreManager;
+    BackgroundAnimator backgroundAnimator;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +68,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         });
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         // Manages so that the volume buttons changes the correct sound stream.
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -53,6 +83,17 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         mediaPlayer.seekTo(0);
         mediaPlayer.start();
 
+        //xml refrences
+        score_view = findViewById(R.id.score);
+        throw_instruction_view = findViewById(R.id.throw_instruction);
+        plane_view = findViewById(R.id.plane);
+        layout = findViewById(R.id.main);
+        clouds = new ImageView[5];
+        clouds[0] = findViewById(R.id.cloud1);
+        clouds[1] = findViewById(R.id.cloud2);
+        clouds[2] = findViewById(R.id.cloud3);
+        clouds[3] = findViewById(R.id.cloud4);
+        clouds[4] = findViewById(R.id.cloud5);
     }
     @Override
     protected void onPause() {
@@ -65,7 +106,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     protected void onResume() {
         super.onResume();
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
-
     }
 
     @Override
@@ -76,10 +116,65 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            long current_time = System.currentTimeMillis();
+
             //tilt of phone
             float x_value = event.values[0];
             float y_value = event.values[1];
             float z_value = event.values[2];
+
+            if (!game_started) {
+                //lowpass filter to filter out gravity (taken from a previous course (BMEN20))
+                gravity[0] = ALPHA * gravity[0] + (1- ALPHA) * x_value;
+                gravity[1] = ALPHA * gravity[1] + (1- ALPHA) * y_value;
+                gravity[2] = ALPHA * gravity[2] + (1- ALPHA) * z_value;
+                x_value = x_value - gravity[0];
+                y_value = y_value - gravity[1];
+                z_value = z_value - gravity[2];
+
+                handle_throw(x_value, y_value, z_value);
+            } else if (current_time - start_time > 2000) {
+                scoreManager.addScore(1);
+                handle_plane_tilt(x_value);
+                backgroundAnimator.animateClouds();
+            }
         }
+    }
+
+    private void handle_throw(float x_value, float y_value, float z_value) {
+        //checks force of movement for throw
+        double force = Math.sqrt(x_value*x_value + y_value*y_value + z_value*z_value);
+        if (force > FORCE_THRESHHOLD) {
+            x_max = Math.max(x_max, x_value);
+            y_max = Math.max(y_max, y_value);
+            z_max = Math.max(z_max, z_value);
+            x_prev = x_value;
+            y_prev = y_value;
+            z_prev = z_value;
+            Log.d("test1", "" + force);
+        }
+        //the end of the throw
+        else if (Math.sqrt(x_prev*x_prev + y_prev*y_prev + z_prev*z_prev) > FORCE_THRESHHOLD) {
+            //point gain for force
+            game_started = true;
+            start_time = System.currentTimeMillis();
+            throw_instruction_view.setVisibility(TextView.GONE);
+            scoreManager = new ScoreManager((int) (Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max)*10), score_view);
+            backgroundAnimator = new BackgroundAnimator(clouds, layout);
+            x_prev = x_value;
+            y_prev = y_value;
+            z_prev = z_value;
+            Log.d("test2", "" + Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max));
+        }
+    }
+
+    private void handle_plane_tilt(float x_value) {
+        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) plane_view.getLayoutParams();
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(layout);
+        //can change the code slightly to avoid changing position when the change is very small to remove stuttering
+        Log.d("test0", "" + x_value);
+        constraintSet.setHorizontalBias(R.id.plane, Math.min(1f, Math.max(lp.horizontalBias - x_value/80.0f, 0f)));
+        constraintSet.applyTo(layout);
     }
 }
