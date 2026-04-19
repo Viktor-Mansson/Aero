@@ -1,6 +1,7 @@
 package com.aero.android.aero;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -10,7 +11,11 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,6 +26,10 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+//REMOVE LATER
+import java.util.Locale;
+import java.util.Random;
 
 public class Game extends AppCompatActivity implements SensorEventListener {
 
@@ -38,10 +47,14 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private ImageView plane_view;
     private ConstraintLayout layout;
     private ImageView[] clouds;
+    private TextView finalScoreText;
+    private TextView scoreboardScoresText;
+    private ConstraintLayout victoryMenu;
 
     private float ALPHA = 0.8f;
     //change according to how hard you have to throw
     private double FORCE_THRESHHOLD = 30;
+
 
     private float[] gravity = new float[3];
     private float x_prev = 0f;
@@ -51,10 +64,15 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private float y_max = 0f;
     private float z_max = 0f;
     private boolean game_started = false;
+    private boolean game_over = false;
     private long start_time = 0;
-    ScoreManager scoreManager;
-    BackgroundAnimator backgroundAnimator;
 
+    //Game references
+    private ScoreManager scoreManager;
+    private BackgroundAnimator backgroundAnimator;
+
+    //REMOVE LATER
+    private float randomFloat = 0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +87,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
         // Manages so that the volume buttons changes the correct sound stream.
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -94,6 +113,24 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         clouds[2] = findViewById(R.id.cloud3);
         clouds[3] = findViewById(R.id.cloud4);
         clouds[4] = findViewById(R.id.cloud5);
+        finalScoreText = findViewById(R.id.timeText);
+        scoreboardScoresText = findViewById(R.id.scoreboardScores);
+        victoryMenu = findViewById(R.id.victoryMenuConstraint);
+
+        //Initialize Buttons
+        Button startButton = findViewById(R.id.restartButton);
+        startButton.setOnClickListener(v -> {
+            resetGame();
+        });
+        Button homeButton = findViewById(R.id.homeButtonScoreboard);
+        homeButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Game.this, MainActivity.class);
+            startActivity(intent);
+        });
+
+        //REMOVE LATER
+        Random random = new Random();
+        randomFloat = random.nextFloat() * 2.0f - 1.0f;
     }
     @Override
     protected void onPause() {
@@ -116,7 +153,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            //Time code
             long current_time = System.currentTimeMillis();
+            long instanceTime = current_time - start_time;
 
             //tilt of phone
             float x_value = event.values[0];
@@ -133,10 +172,16 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 z_value = z_value - gravity[2];
 
                 handle_throw(x_value, y_value, z_value);
-            } else if (current_time - start_time > 2000) {
+            } else if (instanceTime > 2000 && instanceTime <= (6000 + randomFloat*1000)) { //The game has now started and this part handles that
                 scoreManager.addScore(1);
                 handle_plane_tilt(x_value);
                 backgroundAnimator.animateClouds();
+            } else if (instanceTime > (6000 + randomFloat) && !game_over) { //REMOVE LATER
+                game_over = true;
+                finalScoreText.setText(String.format(Locale.US, "Score: %d", scoreManager.getScore()));
+                scoreManager.saveHighScores();
+                scoreboardScoresText.setText(scoreManager.getHighScores());
+                victoryMenu.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -151,7 +196,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             x_prev = x_value;
             y_prev = y_value;
             z_prev = z_value;
-            Log.d("test1", "" + force);
         }
         //the end of the throw
         else if (Math.sqrt(x_prev*x_prev + y_prev*y_prev + z_prev*z_prev) > FORCE_THRESHHOLD) {
@@ -159,12 +203,11 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             game_started = true;
             start_time = System.currentTimeMillis();
             throw_instruction_view.setVisibility(TextView.GONE);
-            scoreManager = new ScoreManager((int) (Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max)*10), score_view);
+            scoreManager = new ScoreManager(this, (int) (Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max)*10), score_view);
             backgroundAnimator = new BackgroundAnimator(clouds, layout);
             x_prev = x_value;
             y_prev = y_value;
             z_prev = z_value;
-            Log.d("test2", "" + Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max));
         }
     }
 
@@ -173,8 +216,30 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layout);
         //can change the code slightly to avoid changing position when the change is very small to remove stuttering
-        Log.d("test0", "" + x_value);
         constraintSet.setHorizontalBias(R.id.plane, Math.min(1f, Math.max(lp.horizontalBias - x_value/80.0f, 0f)));
         constraintSet.applyTo(layout);
+    }
+
+    private void resetGame() {
+        gravity = new float[3];
+        x_prev = 0f;
+        y_prev = 0f;
+        z_prev = 0f;
+        x_max = 0f;
+        y_max = 0f;
+        z_max = 0f;
+        game_started = false;
+        game_over = false;
+        start_time = 0;
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(layout);
+        constraintSet.setHorizontalBias(R.id.plane, 0.5f);
+        constraintSet.applyTo(layout);
+
+        backgroundAnimator.resetClouds();
+
+        victoryMenu.setVisibility(View.GONE);
+        throw_instruction_view.setVisibility(View.VISIBLE);
     }
 }

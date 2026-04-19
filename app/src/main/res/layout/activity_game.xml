@@ -84,6 +84,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <TextView
         android:id="@+id/score"
         android:layout_width="wrap_content"
@@ -107,5 +108,108 @@
         app:srcCompat="@drawable/plane" />
 
 
+    <!--Victory visuals-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/victoryMenuConstraint"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="100dp"
+        android:paddingBottom="80dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <View
+            android:id="@+id/victoryView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#D6492E22"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/finishText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Game Over!"
+            android:textColor="@color/white"
+            android:textSize="50dp"
+            app:layout_constraintBottom_toTopOf="@id/timeText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/victoryView" />
+
+        <TextView
+            android:id="@+id/timeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Score:"
+            android:textColor="@color/white"
+            android:textSize="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/finishText" />
+
+        <TextView
+            android:id="@+id/scoreboardText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Scoreboard"
+            android:textColor="@color/white"
+            android:textSize="40dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/timeText" />
+
+        <TextView
+            android:id="@+id/scoreboardScores"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="1.no score\n2.no score\n3.no score\n4.no score\n5.no score\n6.no score\n7.no score\n8.no score\n9.no score\n10.no score"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/scoreboardText" />
+
+        <Button
+            android:id="@+id/restartButton"
+            android:layout_width="145dp"
+            android:layout_height="141dp"
+            android:text="Restart"
+            android:textSize="22dp"
+            app:layout_constraintBottom_toBottomOf="@+id/victoryView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/scoreboardScores"
+            app:shapeAppearanceOverlay="@style/Circular"
+            app:strokeColor="#000000"
+            app:strokeWidth="2dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:id="@+id/homeButtonScoreboard"
+        android:layout_width="89dp"
+        android:layout_height="70dp"
+        android:text="Go back"
+        android:textSize="15dp"
+        app:backgroundTint="@color/pink"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.049"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.042"
+        app:shapeAppearanceOverlay="@style/Circular"
+        app:strokeColor="#000000"
+        app:strokeWidth="2dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

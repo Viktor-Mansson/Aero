@@ -1,7 +1,29 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.Aero" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Customize your light theme hee. -->
+        <item name="colorPrimary">@color/blue</item>
+        <item name="colorSecondary">@color/eggwhite</item>
+        <item name="colorAccent">@color/green</item>
+        <item name="android:colorBackground">@color/yellow</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="shapeAppearanceSmallComponent">@style/buttonStyle</item>
+        <item name="android:fontFamily">@font/testfont</item>
+    </style>
+
+    <style name="Theme.Aero" parent="Base.Theme.Aero" />
+
+    <style name="buttonStyle" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <!-- Set the corner size for small components like Buttons, EditTexts, etc. -->
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">24dp</item>
+
+    </style>
+
+    <style name="Circular">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
 </resources>

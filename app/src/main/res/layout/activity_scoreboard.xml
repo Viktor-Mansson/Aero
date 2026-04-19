@@ -26,9 +26,10 @@
         app:strokeWidth="2dp" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/scoreboardText"
         android:layout_width="292dp"
         android:layout_height="95dp"
+        android:gravity="center"
         android:text="Scoreboard"
         android:textSize="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -36,6 +37,18 @@
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.295" />
+        app:layout_constraintVertical_bias="0.18" />
+
+    <TextView
+        android:id="@+id/scoreboardScores"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="1.no score\n2.no score\n3.no score\n4.no score\n5.no score\n6.no score\n7.no score\n8.no score\n9.no score\n10.no score"
+        android:textSize="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scoreboardText"
+        app:shapeAppearanceOverlay="@style/Circular" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

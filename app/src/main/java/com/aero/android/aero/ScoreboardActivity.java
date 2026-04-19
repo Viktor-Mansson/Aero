@@ -3,6 +3,7 @@ package com.aero.android.aero;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,5 +28,9 @@ public class ScoreboardActivity extends AppCompatActivity {
             Intent intent = new Intent(ScoreboardActivity.this, MainActivity.class);
             startActivity(intent);
         });
+
+        ScoreManager scoreManager = new ScoreManager(this, 0, findViewById(R.id.scoreboardScores));
+        scoreManager.getHighScores();
+        ((TextView) findViewById(R.id.scoreboardScores)).setText(scoreManager.getHighScores());
     }
 }
