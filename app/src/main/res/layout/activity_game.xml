@@ -8,6 +8,7 @@
     tools:context=".Game">
 
 
+
     <ImageView
         android:id="@+id/cloud1"
         android:layout_width="200dp"
@@ -84,7 +85,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/obstacle" />
+        app:srcCompat="@drawable/bird" />
 
     <ImageView
         android:id="@+id/obstacle2"
@@ -97,7 +98,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/obstacle" />
+        app:srcCompat="@drawable/bird" />
 
     <ImageView
         android:id="@+id/obstacle3"
@@ -110,7 +111,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/obstacle" />
+        app:srcCompat="@drawable/bird" />
 
     <ImageView
         android:id="@+id/obstacle4"
@@ -123,7 +124,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/obstacle" />
+        app:srcCompat="@drawable/bird" />
 
 
     <TextView
@@ -265,5 +266,36 @@
         app:shapeAppearanceOverlay="@style/Circular"
         app:strokeColor="#000000"
         app:strokeWidth="2dp" />
+
+    <ImageView
+        android:id="@+id/heart3"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/heart" />
+
+
+    <ImageView
+        android:id="@+id/heart2"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="68dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/heart" />
+
+    <ImageView
+        android:id="@+id/heart1"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="120dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/heart" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

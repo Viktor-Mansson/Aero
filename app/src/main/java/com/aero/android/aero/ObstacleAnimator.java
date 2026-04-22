@@ -1,5 +1,8 @@
 package com.aero.android.aero;
 
+import android.graphics.Rect;
+import android.media.Image;
+import android.view.View;
 import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -26,6 +29,29 @@ public class ObstacleAnimator {
                 obstacle.setX((float) (Math.random() * maxX));
             }
         });
+    }
+
+    public Rect getCustomHitbox(View v, int marginX, int marginY) {
+        Rect rect = new Rect();
+        v.getGlobalVisibleRect(rect);
+        rect.left += marginX;
+        rect.right -= marginX;
+        rect.top += marginY;
+        rect.bottom -= marginY;
+        return rect;
+    }
+    public boolean isCollision(View v1) {
+        Rect rect1 = getCustomHitbox(v1, 40, 40);
+
+        for (ImageView obstacle : obstacles) {
+            Rect rect2 = getCustomHitbox(obstacle, 30, 58);
+
+            if (Rect.intersects(rect1, rect2)) {
+                obstacle.setTranslationY(obstacle.getTranslationY() - layout.getHeight() - obstacle.getHeight());
+                return true;
+            }
+        }
+        return false;
     }
 
     public void animateObstacles() {
