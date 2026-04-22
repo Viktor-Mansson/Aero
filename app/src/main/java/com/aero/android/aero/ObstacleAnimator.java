@@ -8,7 +8,7 @@ public class ObstacleAnimator {
     private final ImageView[] obstacles;
     private final float[] initialYPositions;
     private final ConstraintLayout layout;
-    private final float obstacle_speed = 5f;
+    private final float obstacle_speed = 10f;
 
 
     public ObstacleAnimator(ImageView[] c, ConstraintLayout l) {
@@ -20,10 +20,12 @@ public class ObstacleAnimator {
             initialYPositions[i] = obstacles[i].getTranslationY();
         }
 
-        for (int i = 0; i < obstacles.length; i++) {
-            obstacles[i].setTranslationX((float) (Math.random() * (l.getWidth() - obstacles[i].getWidth()*2)));
-
-        }
+        layout.post(() -> {
+            for (ImageView obstacle : obstacles) {
+                float maxX = layout.getWidth() - obstacle.getWidth();
+                obstacle.setX((float) (Math.random() * maxX));
+            }
+        });
     }
 
     public void animateObstacles() {
@@ -33,9 +35,12 @@ public class ObstacleAnimator {
         }
     }
 
-    private void checkBoundary(ImageView cloud) {
-        if (cloud.getTranslationY() > layout.getHeight()) {
-            cloud.setTranslationY(cloud.getTranslationY() - layout.getHeight() - cloud.getHeight());
+    private void checkBoundary(ImageView obstacle) {
+        if (obstacle.getTranslationY() > layout.getHeight()) {
+            obstacle.setTranslationY(obstacle.getTranslationY() - layout.getHeight() - obstacle.getHeight());
+
+            float maxX = layout.getWidth() - obstacle.getWidth();
+            obstacle.setX((float) (Math.random() * maxX));
         }
 
     }
