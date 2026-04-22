@@ -73,6 +73,59 @@
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/cloud" />
 
+    <ImageView
+        android:id="@+id/obstacle1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:translationY="-1000dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.36"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/bird" />
+
+    <ImageView
+        android:id="@+id/obstacle2"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:translationY="-1300dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.36"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/bird" />
+
+    <ImageView
+        android:id="@+id/obstacle3"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:translationY="-1600dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.36"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/bird" />
+
+    <ImageView
+        android:id="@+id/obstacle4"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:translationY="-1900dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.36"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/bird" />
+
+
     <TextView
         android:id="@+id/throw_instruction"
         android:layout_width="345dp"
@@ -273,5 +326,36 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+
+    <ImageView
+        android:id="@+id/heart3"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/heart" />
+
+
+    <ImageView
+        android:id="@+id/heart2"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="68dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/heart" />
+
+    <ImageView
+        android:id="@+id/heart1"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="120dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/heart" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

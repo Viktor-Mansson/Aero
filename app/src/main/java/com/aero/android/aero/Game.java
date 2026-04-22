@@ -2,15 +2,19 @@ package com.aero.android.aero;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.Image;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
 import android.util.Log;
@@ -28,9 +32,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-//REMOVE LATER
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Locale;
-import java.util.Random;
+
 
 public class Game extends AppCompatActivity implements SensorEventListener {
 
@@ -45,16 +50,25 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     //xml references
     private TextView score_view;
     private TextView throw_instruction_view;
-    private ImageView plane_view;
+    private ImageView plane_view, heart1, heart2, heart3;
     private ConstraintLayout layout;
     private ImageView[] clouds;
+
+    private Deque<ImageView> deadHearts = new ArrayDeque<ImageView>();
+    private Deque<ImageView> aliveHearts = new ArrayDeque<ImageView>();
+
+    private ImageView[] obstacles;
     private TextView finalScoreText;
     private TextView scoreboardScoresText;
     private ConstraintLayout victoryMenu;
 
+    private Vibrator vib;
+
     private float ALPHA = 0.8f;
     //change according to how hard you have to throw
     private double FORCE_THRESHHOLD = 30;
+
+    private int birdSound;
 
 
     private float[] gravity = new float[3];
@@ -68,12 +82,14 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private boolean game_over = false;
     private long start_time = 0;
 
+    private int health = 3;
+
     //Game references
     private ScoreManager scoreManager;
     private BackgroundAnimator backgroundAnimator;
 
-    //REMOVE LATER
-    private float randomFloat = 0f;
+    private ObstacleAnimator obstacleAnimator;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +119,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         mediaPlayer.seekTo(0);
         mediaPlayer.start();
 
+        birdSound = soundPool.load(this,R.raw.birdhit,1);
+        vib = this.getSystemService(Vibrator.class);
+
         //xml refrences
         score_view = findViewById(R.id.score);
         throw_instruction_view = findViewById(R.id.throw_instruction);
@@ -114,6 +133,19 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         clouds[2] = findViewById(R.id.cloud3);
         clouds[3] = findViewById(R.id.cloud4);
         clouds[4] = findViewById(R.id.cloud5);
+        obstacles = new ImageView[4];
+        obstacles[0] = findViewById(R.id.obstacle1);
+        obstacles[1] = findViewById(R.id.obstacle2);
+        obstacles[2] = findViewById(R.id.obstacle3);
+        obstacles[3] = findViewById(R.id.obstacle4);
+        heart1 = findViewById(R.id.heart1);
+        heart2 = findViewById(R.id.heart2);
+        heart3 = findViewById(R.id.heart3);
+
+        aliveHearts.addLast(heart1);
+        aliveHearts.addLast(heart2);
+        aliveHearts.addLast(heart3);
+
         finalScoreText = findViewById(R.id.timeText);
         scoreboardScoresText = findViewById(R.id.scoreboardScores);
         victoryMenu = findViewById(R.id.victoryMenuConstraint);
@@ -128,10 +160,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             Intent intent = new Intent(Game.this, MainActivity.class);
             startActivity(intent);
         });
-
-        //REMOVE LATER
-        Random random = new Random();
-        randomFloat = random.nextFloat() * 2.0f - 1.0f;
     }
     @Override
     protected void onPause() {
@@ -173,11 +201,26 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 z_value = z_value - gravity[2];
 
                 handle_throw(x_value, y_value, z_value);
-            } else if (instanceTime > 2000 && instanceTime <= (6000 + randomFloat*1000)) { //The game has now started and this part handles that
+            } else if (instanceTime > 2000 && health > 0) { //The game has now started and this part handles that
                 scoreManager.addScore(1);
                 handle_plane_tilt(x_value);
                 backgroundAnimator.animateClouds();
-            } else if (instanceTime > (6000 + randomFloat) && !game_over) { //REMOVE LATER
+                obstacleAnimator.animateObstacles();
+
+                if (obstacleAnimator.isCollision(plane_view)) {
+                    health -=1;
+                    soundPool.play(birdSound,1,1,0,0,1);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        vib.vibrate(VibrationEffect.createOneShot(100,180));
+                    }
+                    ImageView heart = aliveHearts.pop();
+                    heart.setVisibility(View.GONE); // takes away a heart when collision
+                    deadHearts.addLast(heart); //adds the heart to a deadstack that hearts can be taken from when flying into one
+                }
+
+
+
+            } else if ( health == 0) { //REMOVE LATER
                 game_over = true;
                 finalScoreText.setText(String.format(Locale.US, "Score: %d", scoreManager.getScore()));
                 scoreManager.saveHighScores();
@@ -206,6 +249,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             throw_instruction_view.setVisibility(TextView.GONE);
             scoreManager = new ScoreManager(this, (int) (Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max)*10), score_view);
             backgroundAnimator = new BackgroundAnimator(clouds, layout);
+            obstacleAnimator = new ObstacleAnimator(obstacles, layout);
             x_prev = x_value;
             y_prev = y_value;
             z_prev = z_value;
@@ -221,6 +265,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         constraintSet.applyTo(layout);
     }
 
+
     private void resetGame() {
         gravity = new float[3];
         x_prev = 0f;
@@ -232,6 +277,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         game_started = false;
         game_over = false;
         start_time = 0;
+        health = 3;
 
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layout);
@@ -239,6 +285,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         constraintSet.applyTo(layout);
 
         backgroundAnimator.resetClouds();
+        obstacleAnimator.resetObstacles();
 
         victoryMenu.setVisibility(View.GONE);
         throw_instruction_view.setVisibility(View.VISIBLE);
