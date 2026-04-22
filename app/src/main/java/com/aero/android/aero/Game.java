@@ -16,6 +16,7 @@ import android.os.VibratorManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -118,11 +119,11 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         victoryMenu = findViewById(R.id.victoryMenuConstraint);
 
         //Initialize Buttons
-        Button startButton = findViewById(R.id.restartButton);
+        ImageButton startButton = findViewById(R.id.restartButton);
         startButton.setOnClickListener(v -> {
             resetGame();
         });
-        Button homeButton = findViewById(R.id.homeButtonScoreboard);
+        ImageButton homeButton = findViewById(R.id.homeButtonScoreboard);
         homeButton.setOnClickListener(v -> {
             Intent intent = new Intent(Game.this, MainActivity.class);
             startActivity(intent);

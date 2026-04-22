@@ -78,7 +78,7 @@
         android:layout_height="163dp"
         android:text="THROW THE PLANE"
         android:textAlignment="center"
-        android:textSize="54dp"
+        android:textSize="54sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -92,6 +92,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginTop="2dp"
         android:text="score: 0"
+        android:textSize="30sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -113,32 +114,39 @@
         android:id="@+id/victoryMenuConstraint"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="100dp"
-        android:paddingBottom="80dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="60dp"
+        android:paddingBottom="60dp"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <View
+
+        <ImageView
             android:id="@+id/victoryView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#D6492E22"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            app:srcCompat="@drawable/whiteboard" />
 
         <TextView
             android:id="@+id/finishText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
             android:gravity="center"
             android:text="Game Over!"
-            android:textColor="@color/white"
-            android:textSize="50dp"
+            android:textColor="@color/black"
+            android:textSize="60sp"
             app:layout_constraintBottom_toTopOf="@id/timeText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -149,9 +157,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Score:"
-            android:textColor="@color/white"
-            android:textSize="30dp"
+            android:text="Your Score:"
+            android:textColor="@color/black"
+            android:textSize="25sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/finishText" />
@@ -162,8 +170,9 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="Scoreboard"
-            android:textColor="@color/white"
-            android:textSize="40dp"
+            android:textColor="@color/black"
+            android:textSize="40sp"
+            android:paddingTop="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/timeText" />
@@ -174,42 +183,81 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="1.no score\n2.no score\n3.no score\n4.no score\n5.no score\n6.no score\n7.no score\n8.no score\n9.no score\n10.no score"
-            android:textColor="@color/white"
-            android:textSize="20dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/scoreboardText" />
 
-        <Button
-            android:id="@+id/restartButton"
-            android:layout_width="145dp"
-            android:layout_height="141dp"
-            android:text="Restart"
-            android:textSize="22dp"
+        <ImageView
+            android:id="@+id/sadSmiley"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rotation="25"
+            app:layout_constraintBottom_toBottomOf="@+id/scoreboardScores"
+            app:layout_constraintEnd_toEndOf="@+id/victoryView"
+            app:layout_constraintStart_toEndOf="@+id/scoreboardScores"
+            app:layout_constraintTop_toBottomOf="@+id/scoreboardText"
+            app:layout_constraintVertical_bias="0.1"
+            app:srcCompat="@drawable/cheeky_svg_icon" />
+
+        <ImageView
+            android:id="@+id/cheekySmiley"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rotation="-20"
+            app:layout_constraintBottom_toBottomOf="@+id/scoreboardText"
+            app:layout_constraintEnd_toStartOf="@+id/timeText"
+            app:layout_constraintStart_toStartOf="@+id/victoryView"
+            app:layout_constraintTop_toTopOf="@+id/finishText"
+            app:layout_constraintVertical_bias="0.6"
+            app:srcCompat="@drawable/sad_svg_icon" />
+
+        <ImageView
+            android:id="@+id/starIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rotation="-25"
+            app:layout_constraintBottom_toTopOf="@+id/restartButton"
+            app:layout_constraintEnd_toStartOf="@+id/scoreboardScores"
+            app:layout_constraintStart_toStartOf="@+id/victoryView"
+            app:layout_constraintTop_toBottomOf="@+id/scoreboardText"
+            app:layout_constraintVertical_bias="0.86"
+            app:srcCompat="@drawable/star_svg_icon" />
+
+        <ImageButton
+            android:id="@+id/homeButtonScoreboard"
+            android:layout_width="115dp"
+            android:layout_height="98dp"
+            android:layout_marginStart="55dp"
+            android:background="@drawable/pink_button"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/home_button_svg_icon"
             app:layout_constraintBottom_toBottomOf="@+id/victoryView"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/scoreboardScores"
-            app:shapeAppearanceOverlay="@style/Circular"
-            app:strokeColor="#000000"
-            app:strokeWidth="2dp" />
+            app:layout_constraintVertical_bias="0.508"
+            app:shapeAppearanceOverlay="@style/Circular" />
+
+        <ImageButton
+            android:id="@+id/restartButton"
+            android:layout_width="115dp"
+            android:layout_height="98dp"
+            android:background="@drawable/blue_button"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/replay_button_svg_icon"
+            app:layout_constraintBottom_toBottomOf="@+id/victoryView"
+            app:layout_constraintEnd_toEndOf="@+id/victoryView"
+            app:layout_constraintHorizontal_bias="0.4"
+            app:layout_constraintStart_toEndOf="@+id/homeButtonScoreboard"
+            app:layout_constraintTop_toBottomOf="@+id/scoreboardScores"
+            app:layout_constraintVertical_bias="0.508"
+            app:shapeAppearanceOverlay="@style/Circular" />
+
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <Button
-        android:id="@+id/homeButtonScoreboard"
-        android:layout_width="89dp"
-        android:layout_height="70dp"
-        android:text="Go back"
-        android:textSize="15dp"
-        app:backgroundTint="@color/pink"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.049"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.042"
-        app:shapeAppearanceOverlay="@style/Circular"
-        app:strokeColor="#000000"
-        app:strokeWidth="2dp" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
