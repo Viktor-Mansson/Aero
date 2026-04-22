@@ -47,6 +47,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private ImageView plane_view;
     private ConstraintLayout layout;
     private ImageView[] clouds;
+
+    private ImageView[] obstacles;
     private TextView finalScoreText;
     private TextView scoreboardScoresText;
     private ConstraintLayout victoryMenu;
@@ -70,6 +72,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     //Game references
     private ScoreManager scoreManager;
     private BackgroundAnimator backgroundAnimator;
+
+    private ObstacleAnimator obstacleAnimator;
 
     //REMOVE LATER
     private float randomFloat = 0f;
@@ -113,6 +117,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         clouds[2] = findViewById(R.id.cloud3);
         clouds[3] = findViewById(R.id.cloud4);
         clouds[4] = findViewById(R.id.cloud5);
+        obstacles = new ImageView[1];
+        obstacles[0] = findViewById(R.id.obstacle);
+
+
         finalScoreText = findViewById(R.id.timeText);
         scoreboardScoresText = findViewById(R.id.scoreboardScores);
         victoryMenu = findViewById(R.id.victoryMenuConstraint);
@@ -176,6 +184,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 scoreManager.addScore(1);
                 handle_plane_tilt(x_value);
                 backgroundAnimator.animateClouds();
+                obstacleAnimator.animateObstacles();
             } else if (instanceTime > (6000 + randomFloat) && !game_over) { //REMOVE LATER
                 game_over = true;
                 finalScoreText.setText(String.format(Locale.US, "Score: %d", scoreManager.getScore()));
@@ -205,6 +214,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             throw_instruction_view.setVisibility(TextView.GONE);
             scoreManager = new ScoreManager(this, (int) (Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max)*10), score_view);
             backgroundAnimator = new BackgroundAnimator(clouds, layout);
+            obstacleAnimator = new ObstacleAnimator(obstacles, layout);
             x_prev = x_value;
             y_prev = y_value;
             z_prev = z_value;
