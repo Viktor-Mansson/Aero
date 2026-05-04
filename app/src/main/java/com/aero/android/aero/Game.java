@@ -202,7 +202,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
                 handle_throw(x_value, y_value, z_value);
             } else if (instanceTime > 2000 && health > 0) { //The game has now started and this part handles that
-                scoreManager.addScore(1);
+                scoreManager.addScore(1L);
                 handle_plane_tilt(x_value);
                 backgroundAnimator.animateClouds();
                 obstacleAnimator.animateObstacles();
@@ -218,7 +218,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                     deadHearts.addLast(heart); //adds the heart to a deadstack that hearts can be taken from when flying into one
                 }
 
-            } else if ( health == 0) { //REMOVE LATER
+            } else if ( health == 0 && !game_over) { //REMOVE LATER
                 game_over = true;
                 finalScoreText.setText(String.format(Locale.US, "Score: %d", scoreManager.getScore()));
                 scoreManager.saveHighScores();
@@ -284,7 +284,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         heart2.setVisibility(View.VISIBLE);
         heart3.setVisibility(View.VISIBLE);
         deadHearts.clear();
-        scoreManager.addScore(0);
+        scoreManager.addScore(0L);
 
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layout);

@@ -28,7 +28,7 @@ public class ScoreManager {
         sp = context.getSharedPreferences("Leaderboard", Context.MODE_PRIVATE);
     }
 
-    public void addScore(int s) {
+    public void addScore(long s) {
         score += s;
         updateVisualScore();
     }
@@ -73,8 +73,8 @@ public class ScoreManager {
         }
 
         scores.add(score);
-        resetScore();
         Collections.sort(scores, Collections.reverseOrder());
+        resetScore();
 
         //Only keep top 10
         if (scores.size() > 10) scores = scores.subList(0, 10);
@@ -89,6 +89,6 @@ public class ScoreManager {
     }
 
     private void resetScore() {
-        score = 0;
+        score = 0L;
     }
 }
