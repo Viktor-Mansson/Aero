@@ -3,6 +3,7 @@ package com.aero.android.aero;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,20 +25,20 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        Button startButton = findViewById(R.id.startButton);
+        ImageButton startButton = findViewById(R.id.startButton);
         startButton.setOnClickListener(v -> {
             Intent startAccActivityIntent = new Intent(MainActivity.this,
                     Game.class);
             startActivity(startAccActivityIntent);
         });
 
-        Button instructionsButton = findViewById(R.id.instructionsButton);
+        ImageButton instructionsButton = findViewById(R.id.instructionsButton);
         instructionsButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, InstructionsActivity.class);
             startActivity(intent);
         });
 
-        Button scoreboardButton = findViewById(R.id.scoreboardButton);
+        ImageButton scoreboardButton = findViewById(R.id.scoreboardButton);
         scoreboardButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ScoreboardActivity.class);
             startActivity(intent);

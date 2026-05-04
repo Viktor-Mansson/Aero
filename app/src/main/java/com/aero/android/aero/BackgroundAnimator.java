@@ -10,7 +10,6 @@ public class BackgroundAnimator {
     private final ConstraintLayout layout;
     private final float cloud_speed = 5f;
 
-
     public BackgroundAnimator(ImageView[] c, ConstraintLayout l) {
         clouds = c.clone();
         layout = l;
