@@ -177,6 +177,34 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/highScore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="68dp"
+        android:text="New Highscore!"
+        android:textSize="30sp"
+        android:textColor="#97C09B"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/crown"
+        android:layout_width="44dp"
+        android:layout_height="39dp"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="44dp"
+        android:rotation="-20"
+        app:layout_constraintBottom_toTopOf="@+id/highScore"
+        app:layout_constraintEnd_toEndOf="@+id/highScore"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/crown" />
+
+
 
     <ImageView
         android:id="@+id/plane"
@@ -458,5 +486,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/heart" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

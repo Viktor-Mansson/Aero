@@ -1,6 +1,8 @@
 package com.aero.android.aero;
 
 
+import static java.lang.Long.parseLong;
+
 import android.widget.TextView;
 
 //Imports for scoreboard
@@ -40,7 +42,28 @@ public class ScoreManager {
     public long getScore() {
         return score;
     }
+    public boolean checkHighScore() {
+        String rawScores = getHighScores();
+        //if no score
+        if (rawScores == null || rawScores.trim().isEmpty()) {
+            return getScore() > 0;
+        }
 
+        try {
+            String[] highScores = rawScores.split("\n");
+            String[] firstLineParts = highScores[0].split("\\. ");
+            //safety check
+            if (firstLineParts.length < 2) {
+                return getScore() > 0;
+            }
+            long highScore = Long.parseLong(firstLineParts[1].trim());
+            return getScore() > highScore;
+
+        } catch (NumberFormatException e) {
+            // 5. Catch the error if the parsed text isn't a valid number
+            return getScore() > 0;
+        }
+    }
     //For Leaderboards
     public String getHighScores() {
         String savedString = sp.getString("highscores", "");
@@ -50,7 +73,7 @@ public class ScoreManager {
         for (int i = 0; i < 10; i++) {
             sb.append(i + 1).append(". ");
             if (i < parts.length) {
-                sb.append(String.format(Locale.US, "%d", Long.parseLong(parts[i])));
+                sb.append(String.format(Locale.US, "%d", parseLong(parts[i])));
             } else {
                 sb.append("---");
             }
@@ -67,7 +90,7 @@ public class ScoreManager {
         if (!savedScoresString.isEmpty()) {
             String[] parts = savedScoresString.split(",");
             for (String s : parts) {
-                long val = Long.parseLong(s);
+                long val = parseLong(s);
                 if (val > 0) scores.add(val);
             }
         }
