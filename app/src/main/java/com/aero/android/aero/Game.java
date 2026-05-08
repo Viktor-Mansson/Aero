@@ -1,5 +1,6 @@
 package com.aero.android.aero;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -23,6 +24,8 @@ import android.os.VibratorManager;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -60,9 +63,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     //xml references
     private TextView score_view, highScore_view;
     private TextView throw_instruction_view;
-    private ImageView plane_view, heart1, heart2, heart3, crown;
+    private ImageView plane_view, heart1, heart2, heart3, crown, parkBackground, talkBubble;
     private ConstraintLayout layout;
     private ImageView[] clouds;
+    private ImageButton pauseButton;
 
     private Deque<ImageView> deadHearts = new ArrayDeque<ImageView>();
     private Deque<ImageView> aliveHearts = new ArrayDeque<ImageView>();
@@ -95,6 +99,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private boolean game_over = false;
     private boolean game_paused = false;
     private boolean post_highScore = false;
+    private boolean startAnimationDone = false;
     private long start_time = 0;
     private long highScoreTime = 0;
 
@@ -112,6 +117,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -174,6 +180,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         heart3 = findViewById(R.id.heart3);
         crown = findViewById(R.id.crown);
         crown.setVisibility(View.GONE);
+        parkBackground = findViewById(R.id.parkBackground);
+        talkBubble = findViewById(R.id.talkBubble);
 
         aliveHearts.addLast(heart1);
         aliveHearts.addLast(heart2);
@@ -183,6 +191,13 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         scoreboardScoresText = findViewById(R.id.scoreboardScores);
         victoryMenu = findViewById(R.id.victoryMenuConstraint);
         pauseMenu = findViewById(R.id.pauseMenuConstraint);
+
+        //settings alphas for intro transition
+        heart1.setAlpha(0f);
+        heart2.setAlpha(0f);
+        heart3.setAlpha(0f);
+        score_view.setAlpha(0f);
+
 
         //Initialize Buttons
         ImageButton startButton = findViewById(R.id.restartButton);
@@ -194,7 +209,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             Intent intent = new Intent(Game.this, MainActivity.class);
             startActivity(intent);
         });
-        ImageButton pauseButton = findViewById(R.id.pauseButton);
+        pauseButton = findViewById(R.id.pauseButton);
+        pauseButton.setAlpha(0f);
         pauseButton.setOnClickListener(v -> {
             if (!game_paused) {
                 game_paused = true;
@@ -219,6 +235,12 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 throw_instruction_view.setVisibility(TextView.VISIBLE);
             }
         });
+
+        //Hide Status & Navigation Bar https://developer.android.com/training/system-ui/status
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
     }
     @Override
     protected void onPause() {
@@ -346,7 +368,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             //point gain for force
             game_started = true;
             start_time = System.currentTimeMillis();
-            throw_instruction_view.setVisibility(TextView.GONE);
             scoreManager = new ScoreManager(this, (int) (Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max)*10), score_view);
             backgroundAnimator = new BackgroundAnimator(clouds, layout);
             obstacleAnimator = new ObstacleAnimator(obstacles, layout);
@@ -354,7 +375,83 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             x_prev = x_value;
             y_prev = y_value;
             z_prev = z_value;
+            throwAnimator();
         }
+    }
+
+    private void throwAnimator() {
+        int startValue = 0;
+        int endValue = (int) scoreManager.getScore();
+
+        ValueAnimator animator = ValueAnimator.ofInt(startValue, endValue);
+        animator.setDuration(3000); // 1.5 seconds
+        animator.setInterpolator(new DecelerateInterpolator());
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                // Get the current number for this specific frame
+                int currentValue = (int) animation.getAnimatedValue();
+                // Update the TextView
+                throw_instruction_view.setText("SCORE: \n" + String.valueOf(currentValue));
+            }
+        });
+        animator.start();
+
+        talkBubble.animate()
+                .alpha(0f)
+                .setStartDelay(3000)
+                .setDuration(1500)   // Take 1.5 seconds to fade out
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
+
+        throw_instruction_view.animate()
+                .alpha(0f)
+                .setStartDelay(3000) // Wait exactly 1.5 seconds before starting
+                .setDuration(1500)   // Take 1.5 seconds to fade out
+                .setInterpolator(new DecelerateInterpolator())
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        throw_instruction_view.setText("THROW THE \nPLANE");
+                    }
+                })
+                .start();
+
+        parkBackground.animate()
+                .translationY(6000)
+                .alpha(0f)// Move down
+                .scaleX(4f)        // Zoom in horizontally (1.5x normal size)
+                .scaleY(4f)        // Zoom in vertically (1.5x normal size)
+                .setDuration(6000)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
+
+        heart1.animate()
+                .alpha(1f)
+                .setDuration(6000)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
+        heart2.animate()
+                .alpha(1f)
+                .setDuration(6000)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
+        heart3.animate()
+                .alpha(1f)
+                .setDuration(6000)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
+        score_view.animate()
+                .alpha(1f)
+                .setDuration(6000)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
+        pauseButton.animate()
+                .alpha(1f)
+                .setDuration(6000)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
+
     }
 
     private void handle_plane_tilt(float x_value) {
@@ -399,6 +496,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         heartAnimator.resetHeart();
 
         victoryMenu.setVisibility(View.GONE);
-        throw_instruction_view.setVisibility(View.VISIBLE);
+        throw_instruction_view.setAlpha(1f);
+        talkBubble.setAlpha(1f);
     }
 }
