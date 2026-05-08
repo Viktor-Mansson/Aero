@@ -236,12 +236,18 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 z_value = z_value - gravity[2];
 
                 handle_throw(x_value, y_value, z_value);
-            } else if (instanceTime > 2000 && health > 0) { //The game has now started and this part handles that
-                scoreManager.addScore(1L);
-                handle_plane_tilt(x_value);
+            } else if (instanceTime > 0 && health > 0) { //The game has now started and this part handles that, makes the cloud start directly
                 backgroundAnimator.animateClouds(scoreManager.getScore());
-                obstacleAnimator.animateObstacles(scoreManager.getScore());
-                heartAnimator.animateHeart(scoreManager.getScore());
+
+                if(instanceTime > 2000){ //delays birds and hearts
+                    scoreManager.addScore(1L);
+                    handle_plane_tilt(x_value);
+
+                    obstacleAnimator.animateObstacles(scoreManager.getScore());
+                    heartAnimator.animateHeart(scoreManager.getScore());
+
+                }
+
 
                 if (obstacleAnimator.isCollision(plane_view)) {
                     health -=1;

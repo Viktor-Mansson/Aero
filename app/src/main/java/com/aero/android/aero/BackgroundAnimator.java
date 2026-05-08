@@ -15,9 +15,15 @@ public class BackgroundAnimator {
         layout = l;
 
         initialYPositions = new float[clouds.length];
-        for (int i = 0; i < clouds.length; i++) {
-            initialYPositions[i] = clouds[i].getTranslationY();
-        }
+        layout.post(() -> { // th3e clouds come directly and with even spacing
+            float screenHeight = layout.getHeight();
+            float spacing = screenHeight / clouds.length;
+            for (int i = 0; i < clouds.length; i++) {
+                float offset = spacing * i;
+                clouds[i].setTranslationY(offset);
+                initialYPositions[i] = offset;
+            }
+        });
     }
 
     public void animateClouds(long score) {
