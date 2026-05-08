@@ -65,6 +65,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private TextView finalScoreText;
     private TextView scoreboardScoresText;
     private ConstraintLayout victoryMenu;
+    private ConstraintLayout pauseMenu;
 
     private Vibrator vib;
 
@@ -85,6 +86,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private float z_max = 0f;
     private boolean game_started = false;
     private boolean game_over = false;
+    private boolean game_paused = false;
     private long start_time = 0;
 
     private int health = 3;
@@ -156,6 +158,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         finalScoreText = findViewById(R.id.timeText);
         scoreboardScoresText = findViewById(R.id.scoreboardScores);
         victoryMenu = findViewById(R.id.victoryMenuConstraint);
+        pauseMenu = findViewById(R.id.pauseMenuConstraint);
 
         //Initialize Buttons
         ImageButton startButton = findViewById(R.id.restartButton);
@@ -166,6 +169,31 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         homeButton.setOnClickListener(v -> {
             Intent intent = new Intent(Game.this, MainActivity.class);
             startActivity(intent);
+        });
+        ImageButton pauseButton = findViewById(R.id.pauseButton);
+        pauseButton.setOnClickListener(v -> {
+            if (!game_paused) {
+                game_paused = true;
+                pauseMenu.setVisibility(View.VISIBLE);
+                pauseButton.setVisibility(View.GONE);
+                if (!game_started) {
+                    throw_instruction_view.setVisibility(TextView.GONE);
+                }
+            }
+        });
+        ImageButton homeButtonPause = findViewById(R.id.homeButtonPause);
+        homeButtonPause.setOnClickListener(v -> {
+            Intent intent = new Intent(Game.this, MainActivity.class);
+            startActivity(intent);
+        });
+        ImageButton resumeButton = findViewById(R.id.resumeButton);
+        resumeButton.setOnClickListener(v -> {
+            pauseMenu.setVisibility(View.GONE);
+            pauseButton.setVisibility(View.VISIBLE);
+            game_paused = false;
+            if (!game_started) {
+                throw_instruction_view.setVisibility(TextView.VISIBLE);
+            }
         });
     }
     @Override
@@ -188,7 +216,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER && !game_paused) {
             //Time code
             long current_time = System.currentTimeMillis();
             long instanceTime = current_time - start_time;

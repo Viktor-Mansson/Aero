@@ -12,7 +12,6 @@
         android:id="@+id/cloud1"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:alpha="0.5"
         android:translationY="-200dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -26,7 +25,6 @@
         android:id="@+id/cloud2"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:alpha="0.5"
         android:translationY="-400dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -40,7 +38,6 @@
         android:id="@+id/cloud3"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:alpha="0.5"
         android:translationY="-600dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -54,7 +51,6 @@
         android:id="@+id/cloud4"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:alpha="0.5"
         android:translationY="-800dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -68,7 +64,6 @@
         android:id="@+id/cloud5"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:alpha="0.5"
         android:translationY="-1000dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -180,11 +175,13 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:srcCompat="@drawable/plane" />
 
+
+    <!--Victory visuals-->
     <ImageButton
         android:id="@+id/pauseButton"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="5dp"
         android:background="@drawable/transparent_button"
         android:scaleType="centerInside"
@@ -193,8 +190,6 @@
         app:shapeAppearanceOverlay="@style/Circular"
         app:srcCompat="@drawable/pause_svg_icon" />
 
-
-    <!--Victory visuals-->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/victoryMenuConstraint"
         android:layout_width="match_parent"
@@ -343,7 +338,81 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!--Pause visuals-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/pauseMenuConstraint"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="60dp"
+        android:paddingBottom="400dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
+
+        <ImageView
+            android:id="@+id/PauseView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.5"
+            android:scaleType="fitXY"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            app:srcCompat="@drawable/whiteboard" />
+
+        <TextView
+            android:id="@+id/PauseText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:gravity="center"
+            android:text="Paused"
+            android:textColor="@color/black"
+            android:textSize="60sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/PauseView" />
+
+        <ImageButton
+            android:id="@+id/homeButtonPause"
+            android:layout_width="115dp"
+            android:layout_height="98dp"
+            android:layout_marginStart="54dp"
+            android:background="@drawable/pink_button"
+            android:scaleType="centerInside"
+            app:layout_constraintBottom_toBottomOf="@+id/PauseView"
+            app:layout_constraintStart_toStartOf="@+id/PauseView"
+            app:layout_constraintTop_toBottomOf="@+id/PauseText"
+            app:layout_constraintVertical_bias="0.508"
+            app:shapeAppearanceOverlay="@style/Circular"
+            app:srcCompat="@drawable/home_button_svg_icon" />
+
+        <ImageButton
+            android:id="@+id/resumeButton"
+            android:layout_width="115dp"
+            android:layout_height="98dp"
+            android:background="@drawable/blue_button"
+            android:scaleType="centerInside"
+            app:layout_constraintBottom_toBottomOf="@+id/PauseView"
+            app:layout_constraintEnd_toEndOf="@+id/PauseView"
+            app:layout_constraintHorizontal_bias="0.4"
+            app:layout_constraintStart_toEndOf="@+id/homeButtonPause"
+            app:layout_constraintTop_toBottomOf="@+id/PauseText"
+            app:layout_constraintVertical_bias="0.508"
+            app:shapeAppearanceOverlay="@style/Circular"
+            app:srcCompat="@drawable/play_button_svg_icon" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView
         android:id="@+id/heart3"

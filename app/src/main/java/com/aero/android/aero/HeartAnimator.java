@@ -38,7 +38,7 @@ public class HeartAnimator {
 
     public boolean isCollision(View v1) {
         Rect rect1 = getCustomHitbox(v1, 40, 40);
-        Rect rect2 = getCustomHitbox(heart, 24, 24);
+        Rect rect2 = getCustomHitbox(heart, 50, 50);
 
         if (Rect.intersects(rect1, rect2)) {
             resetHeart();
