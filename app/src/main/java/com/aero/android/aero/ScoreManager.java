@@ -61,7 +61,7 @@ public class ScoreManager {
 
         } catch (NumberFormatException e) {
             // 5. Catch the error if the parsed text isn't a valid number
-            return getScore() > 0;
+            return false;
         }
     }
     //For Leaderboards
