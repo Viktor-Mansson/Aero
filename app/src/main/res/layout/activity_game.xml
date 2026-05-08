@@ -8,6 +8,20 @@
     android:background="@color/blue"
     tools:context=".Game">
 
+    <TextView
+        android:id="@+id/countdownText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="100sp"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        android:elevation="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <ImageView
         android:id="@+id/cloud1"
         android:layout_width="200dp"

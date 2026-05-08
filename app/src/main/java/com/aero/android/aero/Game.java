@@ -14,6 +14,8 @@ import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
@@ -33,7 +35,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -76,6 +80,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private int birdSound;
     private int heartSound;
 
+    private int countDown;
+
+    private TextView countDownText;
+
 
     private float[] gravity = new float[3];
     private float x_prev = 0f;
@@ -88,6 +96,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private boolean game_over = false;
     private boolean game_paused = false;
     private long start_time = 0;
+
+    private List<Handler> countdownHandlers = new ArrayList<>();
+    private int countdownStreamId = 0;
 
     private int health = 3;
 
@@ -116,9 +127,12 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         // Sets up soundpool for sound effects.
-        AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build();
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build();
         soundPool = new SoundPool.Builder().setMaxStreams(3).setAudioAttributes(audioAttributes).build();
+
 
         //Initiates background music and sets it to be looping
         mediaPlayer = MediaPlayer.create(this, R.raw.background_music);
@@ -128,6 +142,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
         birdSound = soundPool.load(this,R.raw.birdhit,1);
         heartSound = soundPool.load(this, R.raw.collect_heart, 1);
+        countDown = soundPool.load(this, R.raw.mario_start,1);
+        countDownText = findViewById(R.id.countdownText);
         vib = this.getSystemService(Vibrator.class);
 
         //xml refrences
@@ -174,6 +190,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         pauseButton.setOnClickListener(v -> {
             if (!game_paused) {
                 game_paused = true;
+                cancelCountdown();
                 pauseMenu.setVisibility(View.VISIBLE);
                 pauseButton.setVisibility(View.GONE);
                 if (!game_started) {
@@ -200,6 +217,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     protected void onPause() {
         super.onPause();
         mediaPlayer.pause();
+        cancelCountdown();
         sensorManager.unregisterListener(this);
     }
 
@@ -237,39 +255,43 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
                 handle_throw(x_value, y_value, z_value);
             } else if (instanceTime > 0 && health > 0) { //The game has now started and this part handles that, makes the cloud start directly
-                backgroundAnimator.animateClouds(scoreManager.getScore());
+                handle_plane_tilt(x_value);
+                if(instanceTime > 4800){
+                    backgroundAnimator.animateClouds(scoreManager.getScore());
 
-                if(instanceTime > 2000){ //delays birds and hearts
+                }
+
+                if(instanceTime > 7800) { //delays birds and hearts
                     scoreManager.addScore(1L);
-                    handle_plane_tilt(x_value);
+
 
                     obstacleAnimator.animateObstacles(scoreManager.getScore());
                     heartAnimator.animateHeart(scoreManager.getScore());
 
-                }
 
+                    if (obstacleAnimator.isCollision(plane_view)) {
+                        health -= 1;
+                        soundPool.play(birdSound, 1, 1, 0, 0, 1);
 
-                if (obstacleAnimator.isCollision(plane_view)) {
-                    health -=1;
-                    soundPool.play(birdSound,1,1,0,0,1);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vib.vibrate(VibrationEffect.createOneShot(100,180));
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vib.vibrate(VibrationEffect.createOneShot(100, 180));
+                        }
+                        ImageView heart = aliveHearts.pop();
+                        heart.setVisibility(View.GONE); // takes away a heart when collision
+                        deadHearts.addFirst(heart); //adds the heart to a deadstack that hearts can be taken from when flying into one
                     }
-                    ImageView heart = aliveHearts.pop();
-                    heart.setVisibility(View.GONE); // takes away a heart when collision
-                    deadHearts.addFirst(heart); //adds the heart to a deadstack that hearts can be taken from when flying into one
-                }
 
-                if (heartAnimator.isCollision(plane_view) && health != 0) {
-                    health = Math.min(health + 1, 3);
-                    soundPool.play(heartSound,1,1,0,0,1);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vib.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1));
-                    }
-                    if (!deadHearts.isEmpty()) {
-                        ImageView heart = deadHearts.pop();
-                        heart.setVisibility(View.VISIBLE);
-                        aliveHearts.addFirst(heart);
+                    if (heartAnimator.isCollision(plane_view) && health != 0) {
+                        health = Math.min(health + 1, 3);
+                        soundPool.play(heartSound, 1, 1, 0, 0, 1);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vib.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1));
+                        }
+                        if (!deadHearts.isEmpty()) {
+                            ImageView heart = deadHearts.pop();
+                            heart.setVisibility(View.VISIBLE);
+                            aliveHearts.addFirst(heart);
+                        }
                     }
                 }
 
@@ -300,6 +322,30 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             game_started = true;
             start_time = System.currentTimeMillis();
             throw_instruction_view.setVisibility(TextView.GONE);
+            mediaPlayer.pause(); // pause music during the sound
+            countDownText.setVisibility(View.VISIBLE);
+            countDownText.setText("3");
+
+            Handler h0 = new Handler(Looper.getMainLooper());
+            h0.postDelayed(() -> {
+                countdownStreamId = soundPool.play(countDown, 1, 1, 0, 0, 1);
+            }, 100);
+            countdownHandlers.add(h0);
+
+            Handler h1 = new Handler(Looper.getMainLooper());
+            h1.postDelayed(() -> countDownText.setText("2"), 1400);
+            countdownHandlers.add(h1);
+
+            Handler h2 = new Handler(Looper.getMainLooper());
+            h2.postDelayed(() -> countDownText.setText("1"), 2500);
+            countdownHandlers.add(h2);
+
+            Handler h3 = new Handler(Looper.getMainLooper());
+            h3.postDelayed(() -> {
+                countDownText.setVisibility(View.GONE);
+                mediaPlayer.start();
+            }, 4800);
+            countdownHandlers.add(h3);
             scoreManager = new ScoreManager(this, (int) (Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max)*10), score_view);
             backgroundAnimator = new BackgroundAnimator(clouds, layout);
             obstacleAnimator = new ObstacleAnimator(obstacles, layout);
@@ -308,6 +354,15 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             y_prev = y_value;
             z_prev = z_value;
         }
+    }
+
+    private void cancelCountdown() {
+        for (Handler h : countdownHandlers) {
+            h.removeCallbacksAndMessages(null);
+        }
+        countdownHandlers.clear();
+        countDownText.setVisibility(View.GONE);
+        soundPool.stop(countdownStreamId);
     }
 
     private void handle_plane_tilt(float x_value) {
@@ -321,6 +376,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
 
     private void resetGame() {
+        mediaPlayer.start();
         gravity = new float[3];
         x_prev = 0f;
         y_prev = 0f;
@@ -350,6 +406,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         backgroundAnimator.resetClouds();
         obstacleAnimator.resetObstacles();
         heartAnimator.resetHeart();
+        countDownText.setVisibility(View.GONE);
 
         victoryMenu.setVisibility(View.GONE);
         throw_instruction_view.setVisibility(View.VISIBLE);
