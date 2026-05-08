@@ -146,7 +146,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         highScoreSound = soundPool.load(this,R.raw.high_score,1);
 
 
-        birdSound = soundPool.load(this,R.raw.birdhit,1);
         heartSound = soundPool.load(this, R.raw.collect_heart, 1);
 
         vib = this.getSystemService(Vibrator.class);
