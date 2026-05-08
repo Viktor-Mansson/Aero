@@ -136,8 +136,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         // Sets up soundpool for sound effects.
-        AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build();
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build();
         soundPool = new SoundPool.Builder().setMaxStreams(3).setAudioAttributes(audioAttributes).build();
 
         //Initiates background music and sets it to be looping
@@ -228,6 +230,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 throw_instruction_view.setVisibility(TextView.VISIBLE);
             }
         });
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
     }
     @Override
     protected void onPause() {
@@ -299,17 +305,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                         heart.setVisibility(View.GONE); // takes away a heart when collision
                         deadHearts.addFirst(heart); //adds the heart to a deadstack that hearts can be taken from when flying into one
                     }
-                if (obstacleAnimator.isCollision(plane_view)) {
-                    health -=1;
-                    soundPool.play(birdSound,1,1,0,0,1);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vib.vibrate(VibrationEffect.createOneShot(150,250));
-
-                    }
-                    ImageView heart = aliveHearts.pop();
-                    heart.setVisibility(View.GONE); // takes away a heart when collision
-                    deadHearts.addFirst(heart); //adds the heart to a deadstack that hearts can be taken from when flying into one
-                }
 
                     if (heartAnimator.isCollision(plane_view) && health != 0) {
                         health = Math.min(health + 1, 3);
