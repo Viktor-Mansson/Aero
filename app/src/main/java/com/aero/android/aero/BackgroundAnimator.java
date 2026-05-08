@@ -8,7 +8,7 @@ public class BackgroundAnimator {
     private final ImageView[] clouds;
     private final float[] initialYPositions;
     private final ConstraintLayout layout;
-    private final float cloud_speed = 5f;
+    private float cloud_speed = 4f;
 
     public BackgroundAnimator(ImageView[] c, ConstraintLayout l) {
         clouds = c.clone();
@@ -20,7 +20,8 @@ public class BackgroundAnimator {
         }
     }
 
-    public void animateClouds() {
+    public void animateClouds(long score) {
+        cloud_speed = 4f + score * 0.001f;
         for (ImageView cloud: clouds) {
             cloud.setTranslationY(cloud.getTranslationY() + cloud_speed);
             checkBoundrary(cloud);

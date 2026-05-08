@@ -46,6 +46,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private SoundPool soundPool;
     //background music
     private MediaPlayer mediaPlayer;
+    //vibrations
+    private long[] timings = {0, 80, 50, 80};
+    private int[] amplitudes = {0, 150, 0, 255};
 
     //xml references
     private TextView score_view;
@@ -56,6 +59,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
     private Deque<ImageView> deadHearts = new ArrayDeque<ImageView>();
     private Deque<ImageView> aliveHearts = new ArrayDeque<ImageView>();
+    private ImageView heart;
 
     private ImageView[] obstacles;
     private TextView finalScoreText;
@@ -69,6 +73,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private double FORCE_THRESHHOLD = 30;
 
     private int birdSound;
+    private int heartSound;
 
 
     private float[] gravity = new float[3];
@@ -87,8 +92,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     //Game references
     private ScoreManager scoreManager;
     private BackgroundAnimator backgroundAnimator;
-
     private ObstacleAnimator obstacleAnimator;
+    private HeartAnimator heartAnimator;
 
 
     @Override
@@ -120,6 +125,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         mediaPlayer.start();
 
         birdSound = soundPool.load(this,R.raw.birdhit,1);
+        heartSound = soundPool.load(this, R.raw.collect_heart, 1);
         vib = this.getSystemService(Vibrator.class);
 
         //xml refrences
@@ -138,6 +144,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         obstacles[1] = findViewById(R.id.obstacle2);
         obstacles[2] = findViewById(R.id.obstacle3);
         obstacles[3] = findViewById(R.id.obstacle4);
+        heart = findViewById(R.id.heart);
         heart1 = findViewById(R.id.heart1);
         heart2 = findViewById(R.id.heart2);
         heart3 = findViewById(R.id.heart3);
@@ -204,8 +211,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             } else if (instanceTime > 2000 && health > 0) { //The game has now started and this part handles that
                 scoreManager.addScore(1L);
                 handle_plane_tilt(x_value);
-                backgroundAnimator.animateClouds();
-                obstacleAnimator.animateObstacles();
+                backgroundAnimator.animateClouds(scoreManager.getScore());
+                obstacleAnimator.animateObstacles(scoreManager.getScore());
+                heartAnimator.animateHeart(scoreManager.getScore());
 
                 if (obstacleAnimator.isCollision(plane_view)) {
                     health -=1;
@@ -215,7 +223,20 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                     }
                     ImageView heart = aliveHearts.pop();
                     heart.setVisibility(View.GONE); // takes away a heart when collision
-                    deadHearts.addLast(heart); //adds the heart to a deadstack that hearts can be taken from when flying into one
+                    deadHearts.addFirst(heart); //adds the heart to a deadstack that hearts can be taken from when flying into one
+                }
+
+                if (heartAnimator.isCollision(plane_view) && health != 0) {
+                    health = Math.min(health + 1, 3);
+                    soundPool.play(heartSound,1,1,0,0,1);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        vib.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1));
+                    }
+                    if (!deadHearts.isEmpty()) {
+                        ImageView heart = deadHearts.pop();
+                        heart.setVisibility(View.VISIBLE);
+                        aliveHearts.addFirst(heart);
+                    }
                 }
 
             } else if ( health == 0 && !game_over) { //REMOVE LATER
@@ -248,6 +269,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             scoreManager = new ScoreManager(this, (int) (Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max)*10), score_view);
             backgroundAnimator = new BackgroundAnimator(clouds, layout);
             obstacleAnimator = new ObstacleAnimator(obstacles, layout);
+            heartAnimator = new HeartAnimator(heart, layout);
             x_prev = x_value;
             y_prev = y_value;
             z_prev = z_value;
@@ -293,6 +315,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
         backgroundAnimator.resetClouds();
         obstacleAnimator.resetObstacles();
+        heartAnimator.resetHeart();
 
         victoryMenu.setVisibility(View.GONE);
         throw_instruction_view.setVisibility(View.VISIBLE);

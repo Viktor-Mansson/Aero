@@ -11,7 +11,7 @@ public class ObstacleAnimator {
     private final ImageView[] obstacles;
     private final float[] initialYPositions;
     private final ConstraintLayout layout;
-    private final float obstacle_speed = 10f;
+    private float obstacle_speed = 8f;
 
 
     public ObstacleAnimator(ImageView[] c, ConstraintLayout l) {
@@ -54,7 +54,8 @@ public class ObstacleAnimator {
         return false;
     }
 
-    public void animateObstacles() {
+    public void animateObstacles(long score) {
+        obstacle_speed = 8f + score * 0.001f;
         for (ImageView cloud: obstacles) {
             cloud.setTranslationY(cloud.getTranslationY() + obstacle_speed);
             checkBoundary(cloud);
