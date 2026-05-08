@@ -2,7 +2,10 @@ package com.aero.android.aero;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Rect;
+import android.graphics.Shader;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -17,6 +20,7 @@ import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
+import android.text.TextPaint;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,10 +35,13 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 
 public class Game extends AppCompatActivity implements SensorEventListener {
@@ -51,9 +58,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private int[] amplitudes = {0, 150, 0, 255};
 
     //xml references
-    private TextView score_view;
+    private TextView score_view, highScore_view;
     private TextView throw_instruction_view;
-    private ImageView plane_view, heart1, heart2, heart3;
+    private ImageView plane_view, heart1, heart2, heart3, crown;
     private ConstraintLayout layout;
     private ImageView[] clouds;
 
@@ -73,7 +80,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     //change according to how hard you have to throw
     private double FORCE_THRESHHOLD = 30;
 
-    private int birdSound;
+    private int birdSound, swooshSound, loseSound, highScoreSound;
     private int heartSound;
 
 
@@ -87,7 +94,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private boolean game_started = false;
     private boolean game_over = false;
     private boolean game_paused = false;
+    private boolean post_highScore = false;
     private long start_time = 0;
+    private long highScoreTime = 0;
 
     private int health = 3;
 
@@ -116,22 +125,36 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         // Sets up soundpool for sound effects.
-        AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build();
-        soundPool = new SoundPool.Builder().setMaxStreams(3).setAudioAttributes(audioAttributes).build();
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME) // Groups it with game/media volume
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        soundPool = new SoundPool.Builder()
+                .setMaxStreams(5)
+                .setAudioAttributes(audioAttributes)
+                .build();
 
         //Initiates background music and sets it to be looping
         mediaPlayer = MediaPlayer.create(this, R.raw.background_music);
         mediaPlayer.setLooping(true);
         mediaPlayer.seekTo(0);
-        mediaPlayer.start();
+
+
+        birdSound = soundPool.load(this,R.raw.hurt2,1);
+        swooshSound = soundPool.load(this,R.raw.swoosh,1);
+        loseSound = soundPool.load(this,R.raw.lose,1);
+        highScoreSound = soundPool.load(this,R.raw.high_score,1);
+
 
         birdSound = soundPool.load(this,R.raw.birdhit,1);
         heartSound = soundPool.load(this, R.raw.collect_heart, 1);
+
         vib = this.getSystemService(Vibrator.class);
 
         //xml refrences
         score_view = findViewById(R.id.score);
+        highScore_view = findViewById(R.id.highScore);
+        highScore_view.setVisibility(View.GONE);
         throw_instruction_view = findViewById(R.id.throw_instruction);
         plane_view = findViewById(R.id.plane);
         layout = findViewById(R.id.main);
@@ -150,6 +173,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         heart1 = findViewById(R.id.heart1);
         heart2 = findViewById(R.id.heart2);
         heart3 = findViewById(R.id.heart3);
+        crown = findViewById(R.id.crown);
+        crown.setVisibility(View.GONE);
 
         aliveHearts.addLast(heart1);
         aliveHearts.addLast(heart2);
@@ -236,11 +261,13 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 z_value = z_value - gravity[2];
 
                 handle_throw(x_value, y_value, z_value);
+                soundPool.play(swooshSound, 1, 1, 0,0, 1);
             } else if (instanceTime > 0 && health > 0) { //The game has now started and this part handles that, makes the cloud start directly
                 backgroundAnimator.animateClouds(scoreManager.getScore());
 
                 if(instanceTime > 2000){ //delays birds and hearts
                     scoreManager.addScore(1L);
+                    mediaPlayer.start();
                     handle_plane_tilt(x_value);
 
                     obstacleAnimator.animateObstacles(scoreManager.getScore());
@@ -253,7 +280,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                     health -=1;
                     soundPool.play(birdSound,1,1,0,0,1);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vib.vibrate(VibrationEffect.createOneShot(100,180));
+                        vib.vibrate(VibrationEffect.createOneShot(150,250));
+
                     }
                     ImageView heart = aliveHearts.pop();
                     heart.setVisibility(View.GONE); // takes away a heart when collision
@@ -272,11 +300,31 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                         aliveHearts.addFirst(heart);
                     }
                 }
+                if(scoreManager.checkHighScore() && !post_highScore) {
+                    post_highScore = true;
+                    soundPool.play(highScoreSound, 1, 1, 0,0, 1);
+                    highScore_view.setVisibility(View.VISIBLE);
+                    crown.setVisibility(View.VISIBLE);
+                    highScoreTime = instanceTime;
+                    YoYo.with(Techniques.Tada)
+                            .duration(1000)
+                            .repeat(1)
+                            .playOn(findViewById(R.id.highScore));
+                }
+                if(instanceTime > highScoreTime + 3000 && instanceTime < highScoreTime + 3100) {
+                    highScore_view.setVisibility(View.GONE);
+                    crown.setVisibility(View.GONE);
+                }
 
-            } else if ( health == 0 && !game_over) { //REMOVE LATER
+            } else if ( health == 0 && !game_over) {
                 game_over = true;
+                soundPool.play(loseSound,1,1,0,0,1);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vib.vibrate(VibrationEffect.createOneShot(500,250));
+                }
                 finalScoreText.setText(String.format(Locale.US, "Score: %d", scoreManager.getScore()));
                 scoreManager.saveHighScores();
+                post_highScore = false;
                 scoreboardScoresText.setText(scoreManager.getHighScores());
                 victoryMenu.setVisibility(View.VISIBLE);
             }
