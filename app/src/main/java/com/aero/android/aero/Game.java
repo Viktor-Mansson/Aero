@@ -146,6 +146,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         mediaPlayer = MediaPlayer.create(this, R.raw.background_music);
         mediaPlayer.setLooping(true);
         mediaPlayer.seekTo(0);
+        mediaPlayer.start();
 
 
         birdSound = soundPool.load(this,R.raw.hurt2,1);
@@ -286,7 +287,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
                 if(instanceTime > 7800) { //delays birds and hearts
                     scoreManager.addScore(1L);
-                    mediaPlayer.start();
                     handle_plane_tilt(x_value);
 
 
