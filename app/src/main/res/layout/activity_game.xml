@@ -232,6 +232,19 @@
         app:shapeAppearanceOverlay="@style/Circular"
         app:srcCompat="@drawable/pause_svg_icon" />
 
+    <ImageButton
+        android:id="@+id/infoButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/transparent_button"
+        android:scaleType="centerInside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pauseButton"
+        app:shapeAppearanceOverlay="@style/Circular"
+        app:srcCompat="@drawable/small_question_mark_icon_svg" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/victoryMenuConstraint"
         android:layout_width="match_parent"
@@ -376,6 +389,96 @@
             app:layout_constraintVertical_bias="0.508"
             app:shapeAppearanceOverlay="@style/Circular" />
 
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!--Info visuals-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/instructionsMenuConstraint"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="60dp"
+        android:paddingBottom="60dp"
+        android:visibility="gone"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/instructionsView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            app:srcCompat="@drawable/whiteboard" />
+
+        <Button
+            android:id="@+id/homeButtonInstructions"
+            android:layout_width="89dp"
+            android:layout_height="70dp"
+            android:text="Close"
+            android:textSize="15sp"
+            app:backgroundTint="@color/eggwhite"
+            app:layout_constraintBottom_toBottomOf="@+id/instructionsView"
+            app:layout_constraintEnd_toEndOf="@+id/instructionsView"
+            app:layout_constraintHorizontal_bias="0.1"
+            app:layout_constraintStart_toStartOf="@+id/instructionsView"
+            app:layout_constraintTop_toTopOf="@+id/instructionsView"
+            app:layout_constraintVertical_bias="0.042"
+            app:shapeAppearanceOverlay="@style/Circular"
+            app:strokeColor="#000000"
+            app:strokeWidth="2dp" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="292dp"
+            android:layout_height="75dp"
+            android:gravity="center"
+            android:text="Instructions"
+            android:textSize="40sp"
+            app:layout_constraintBottom_toBottomOf="@+id/instructionsView"
+            app:layout_constraintEnd_toEndOf="@+id/instructionsView"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="@+id/instructionsView"
+            app:layout_constraintTop_toTopOf="@+id/instructionsView"
+            app:layout_constraintVertical_bias="0.18" />
+
+        <TextView
+            android:id="@+id/instructionText"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="1. start by doing a throwing motion\n\n2. hold phone normally 🙂\n\n3. tilt the phone to move plane and avoid obstacles\n\n4. Don't crash the plane"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@+id/instructionsView"
+            app:layout_constraintEnd_toEndOf="@+id/instructionsView"
+            app:layout_constraintStart_toStartOf="@+id/instructionsView"
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:layout_constraintVertical_bias="0.100000024" />
+
+
+        <ImageView
+            android:id="@+id/instructions"
+            android:layout_width="275dp"
+            android:layout_height="175dp"
+            android:scaleType="centerInside"
+            app:layout_constraintBottom_toBottomOf="@+id/instructionsView"
+            app:layout_constraintEnd_toEndOf="@+id/instructionsView"
+            app:layout_constraintStart_toStartOf="@+id/instructionsView"
+            app:layout_constraintTop_toBottomOf="@+id/instructionText"
+            app:layout_constraintVertical_bias="0.469"
+            app:srcCompat="@drawable/instructions" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

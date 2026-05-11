@@ -76,7 +76,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private TextView finalScoreText;
     private TextView scoreboardScoresText;
     private ConstraintLayout victoryMenu;
+    private ConstraintLayout instructionsMenu;
     private ConstraintLayout pauseMenu;
+    private ImageButton infoButton;
 
     private Vibrator vib;
 
@@ -193,11 +195,13 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         scoreboardScoresText = findViewById(R.id.scoreboardScores);
         victoryMenu = findViewById(R.id.victoryMenuConstraint);
         pauseMenu = findViewById(R.id.pauseMenuConstraint);
+        instructionsMenu = findViewById(R.id.instructionsMenuConstraint);
 
         //Initialize Buttons
         ImageButton startButton = findViewById(R.id.restartButton);
         startButton.setOnClickListener(v -> {
             resetGame();
+
         });
         ImageButton homeButton = findViewById(R.id.homeButtonScoreboard);
         homeButton.setOnClickListener(v -> {
@@ -230,6 +234,22 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 throw_instruction_view.setVisibility(TextView.VISIBLE);
             }
         });
+
+        infoButton = findViewById(R.id.infoButton);
+        infoButton.setOnClickListener(v -> {
+            pauseButton.setVisibility(View.GONE);
+            infoButton.setVisibility(View.GONE);
+            instructionsMenu.setVisibility(View.VISIBLE);
+
+            Button closeInstructionsButton = findViewById(R.id.homeButtonInstructions);
+            closeInstructionsButton.setOnClickListener(v2 -> {
+                pauseButton.setVisibility(View.VISIBLE);
+                infoButton.setVisibility(View.VISIBLE);
+                instructionsMenu.setVisibility(View.GONE);
+            });
+        });
+
+
         View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -367,6 +387,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             game_started = true;
             start_time = System.currentTimeMillis();
             throw_instruction_view.setVisibility(TextView.GONE);
+            infoButton.setVisibility(View.GONE);
             mediaPlayer.pause(); // pause music during the sound
             countDownText.setVisibility(View.VISIBLE);
             countDownText.setText("3");
@@ -455,5 +476,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
         victoryMenu.setVisibility(View.GONE);
         throw_instruction_view.setVisibility(View.VISIBLE);
+        infoButton.setVisibility(View.VISIBLE);
     }
 }
