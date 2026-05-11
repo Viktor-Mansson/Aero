@@ -77,6 +77,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private TextView scoreboardScoresText;
     private ConstraintLayout victoryMenu;
     private ConstraintLayout pauseMenu;
+    private ImageButton pauseButton;
 
     private Vibrator vib;
 
@@ -142,14 +143,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 .build();
         soundPool = new SoundPool.Builder().setMaxStreams(3).setAudioAttributes(audioAttributes).build();
 
-        //Initiates background music and sets it to be looping
-        mediaPlayer = MediaPlayer.create(this, R.raw.background_music);
-        mediaPlayer.setLooping(true);
-        mediaPlayer.seekTo(0);
-        mediaPlayer.start();
 
-
-        birdSound = soundPool.load(this,R.raw.hurt2,1);
+        birdSound = soundPool.load(this,R.raw.birdhit,1);
         swooshSound = soundPool.load(this,R.raw.swoosh,1);
         loseSound = soundPool.load(this,R.raw.lose,1);
         highScoreSound = soundPool.load(this,R.raw.high_score,1);
@@ -205,7 +200,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             Intent intent = new Intent(Game.this, MainActivity.class);
             startActivity(intent);
         });
-        ImageButton pauseButton = findViewById(R.id.pauseButton);
+        pauseButton = findViewById(R.id.pauseButton);
         pauseButton.setOnClickListener(v -> {
             if (!game_paused) {
                 game_paused = true;
@@ -214,6 +209,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 pauseButton.setVisibility(View.GONE);
                 if (!game_started) {
                     throw_instruction_view.setVisibility(TextView.GONE);
+                } else {
+                    mediaPlayer.pause();
                 }
             }
         });
@@ -229,6 +226,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             game_paused = false;
             if (!game_started) {
                 throw_instruction_view.setVisibility(TextView.VISIBLE);
+            } else {
+                mediaPlayer.start();
             }
         });
         View decorView = getWindow().getDecorView();
@@ -282,7 +281,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 handle_plane_tilt(x_value);
                 if(instanceTime > 4800){
                     backgroundAnimator.animateClouds(scoreManager.getScore());
-
                 }
 
                 if(instanceTime > 7800) { //delays birds and hearts
@@ -337,6 +335,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
             } else if ( health == 0 && !game_over) {
                 game_over = true;
+                pauseButton.setVisibility(ImageButton.GONE);
+                mediaPlayer.stop();
                 soundPool.play(loseSound,1,1,0,0,1);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     vib.vibrate(VibrationEffect.createOneShot(500,250));
@@ -364,10 +364,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         //the end of the throw
         else if (Math.sqrt(x_prev*x_prev + y_prev*y_prev + z_prev*z_prev) > FORCE_THRESHHOLD) {
             //point gain for force
+            pauseButton.setVisibility(ImageButton.GONE);
             game_started = true;
             start_time = System.currentTimeMillis();
             throw_instruction_view.setVisibility(TextView.GONE);
-            mediaPlayer.pause(); // pause music during the sound
             countDownText.setVisibility(View.VISIBLE);
             countDownText.setText("3");
 
@@ -388,7 +388,12 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             Handler h3 = new Handler(Looper.getMainLooper());
             h3.postDelayed(() -> {
                 countDownText.setVisibility(View.GONE);
+                //Initiates background music and sets it to be looping
+                mediaPlayer = MediaPlayer.create(this, R.raw.background_music);
+                mediaPlayer.setLooping(true);
+                mediaPlayer.seekTo(0);
                 mediaPlayer.start();
+                pauseButton.setVisibility(ImageButton.VISIBLE);
             }, 4800);
             countdownHandlers.add(h3);
             scoreManager = new ScoreManager(this, (int) (Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max)*10), score_view);
@@ -455,5 +460,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
         victoryMenu.setVisibility(View.GONE);
         throw_instruction_view.setVisibility(View.VISIBLE);
+        pauseButton.setVisibility(ImageButton.VISIBLE);
     }
 }
