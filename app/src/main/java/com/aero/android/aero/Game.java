@@ -2,6 +2,7 @@ package com.aero.android.aero;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Rect;
@@ -119,7 +120,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private ObstacleAnimator obstacleAnimator;
     private HeartAnimator heartAnimator;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -162,6 +162,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
         vib = this.getSystemService(Vibrator.class);
 
+
+
         //xml refrences
         score_view = findViewById(R.id.score);
         highScore_view = findViewById(R.id.highScore);
@@ -196,6 +198,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         victoryMenu = findViewById(R.id.victoryMenuConstraint);
         pauseMenu = findViewById(R.id.pauseMenuConstraint);
         instructionsMenu = findViewById(R.id.instructionsMenuConstraint);
+
+        scoreManager = new ScoreManager(this, 0, score_view);
 
         //Initialize Buttons
         ImageButton startButton = findViewById(R.id.restartButton);
@@ -254,6 +258,20 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
+
+        // show instructions if game is played for the first time
+        if (!game_started && scoreManager.hasNoScores()) {
+            pauseButton.setVisibility(View.GONE);
+            infoButton.setVisibility(View.GONE);
+            instructionsMenu.setVisibility(View.VISIBLE);
+
+            Button closeInstructionsButton = findViewById(R.id.homeButtonInstructions);
+            closeInstructionsButton.setOnClickListener(v2 -> {
+                pauseButton.setVisibility(View.VISIBLE);
+                infoButton.setVisibility(View.VISIBLE);
+                instructionsMenu.setVisibility(View.GONE);
+            });
+        }
     }
     @Override
     protected void onPause() {

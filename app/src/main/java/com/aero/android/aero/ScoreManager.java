@@ -114,4 +114,9 @@ public class ScoreManager {
     private void resetScore() {
         score = 0L;
     }
+
+    public boolean hasNoScores() {
+        //sp.edit().remove("highscores").apply();
+        return sp.getString("highscores", "").isEmpty();
+    }
 }
