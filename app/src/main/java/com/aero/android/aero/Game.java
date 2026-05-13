@@ -240,16 +240,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
         infoButton = findViewById(R.id.infoButton);
         infoButton.setOnClickListener(v -> {
-            pauseButton.setVisibility(View.GONE);
-            infoButton.setVisibility(View.GONE);
-            instructionsMenu.setVisibility(View.VISIBLE);
-
-            Button closeInstructionsButton = findViewById(R.id.homeButtonInstructions);
-            closeInstructionsButton.setOnClickListener(v2 -> {
-                pauseButton.setVisibility(View.VISIBLE);
-                infoButton.setVisibility(View.VISIBLE);
-                instructionsMenu.setVisibility(View.GONE);
-            });
+            showInstructions();
         });
 
 
@@ -260,17 +251,23 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
         // show instructions if game is played for the first time
         if (!game_started && scoreManager.hasNoScores()) {
-            pauseButton.setVisibility(View.GONE);
-            infoButton.setVisibility(View.GONE);
-            instructionsMenu.setVisibility(View.VISIBLE);
-
-            Button closeInstructionsButton = findViewById(R.id.homeButtonInstructions);
-            closeInstructionsButton.setOnClickListener(v2 -> {
-                pauseButton.setVisibility(View.VISIBLE);
-                infoButton.setVisibility(View.VISIBLE);
-                instructionsMenu.setVisibility(View.GONE);
-            });
+            showInstructions();
         }
+    }
+
+    void showInstructions() {
+        game_paused = true;
+        pauseButton.setVisibility(View.GONE);
+        infoButton.setVisibility(View.GONE);
+        instructionsMenu.setVisibility(View.VISIBLE);
+
+        Button closeInstructionsButton = findViewById(R.id.homeButtonInstructions);
+        closeInstructionsButton.setOnClickListener(v2 -> {
+            pauseButton.setVisibility(View.VISIBLE);
+            infoButton.setVisibility(View.VISIBLE);
+            instructionsMenu.setVisibility(View.GONE);
+            game_paused = false;
+        });
     }
     @Override
     protected void onPause() {
