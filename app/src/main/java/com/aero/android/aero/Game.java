@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.hardware.Sensor;
@@ -26,6 +27,8 @@ import android.os.VibratorManager;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -35,6 +38,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -72,6 +76,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private Deque<ImageView> deadHearts = new ArrayDeque<ImageView>();
     private Deque<ImageView> aliveHearts = new ArrayDeque<ImageView>();
     private ImageView heart;
+    private View hitScreen;
 
     private ImageView[] obstacles;
     private TextView finalScoreText;
@@ -107,8 +112,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private boolean game_over = false;
     private boolean game_paused = false;
     private boolean post_highScore = false;
+    private boolean last_heart_shake = true;
     private long start_time = 0;
     private long highScoreTime = 0;
+    private YoYo.YoYoString heartShakeAnimation;
 
     private List<Handler> countdownHandlers = new ArrayList<>();
     private int countdownStreamId = 0;
@@ -127,6 +134,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -161,6 +169,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         vib = this.getSystemService(Vibrator.class);
 
         //xml refrences
+        hitScreen = findViewById(R.id.hitscreen);
         score_view = findViewById(R.id.score);
         highScore_view = findViewById(R.id.highScore);
         highScore_view.setVisibility(View.GONE);
@@ -321,7 +330,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
                 }
 
-                if(instanceTime > 7800) { //delays birds and hearts
+                if(instanceTime > 5800) { //delays birds and hearts
+
                     scoreManager.addScore(1L);
                     handle_plane_tilt(x_value);
                     handle_score_checkpoints();
@@ -329,8 +339,33 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                     obstacleAnimator.animateObstacles(scoreManager.getScore());
                     heartAnimator.animateHeart(scoreManager.getScore());
 
+                    if(aliveHearts.size() == 1 && last_heart_shake) {
+                        ImageView heart = aliveHearts.peek();
+                        heartShakeAnimation = YoYo.with(Techniques.Shake)
+                                .duration(1000)
+                                .repeat(Animation.INFINITE)
+                                .playOn(heart);
+                        last_heart_shake = false;
+                    }
 
                     if (obstacleAnimator.isCollision(plane_view)) {
+
+                        hitScreen.animate().withStartAction(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        hitScreen.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                        ).setDuration(50).withEndAction(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        hitScreen.setVisibility(View.GONE);
+                                    }
+                                }
+                        ).start();
+
                         health -= 1;
                         soundPool.play(birdSound, 1, 1, 0, 0, 1);
 
@@ -344,6 +379,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
                     if (heartAnimator.isCollision(plane_view) && health != 0) {
                         health = Math.min(health + 1, 3);
+                        last_heart_shake = true;
+                        heartShakeAnimation.stop();
                         soundPool.play(heartSound, 1, 1, 0, 0, 1);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             vib.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1));

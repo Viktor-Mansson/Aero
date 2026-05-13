@@ -131,7 +131,7 @@ public class ObstacleAnimator {
 
     private void handle_kite_states() {
         for (int i = 0; i < kite_movements.length; i++) {
-            kite_movements[i] = kite_movements[i] + 0.03;
+            kite_movements[i] = kite_movements[i] + 0.03 % (2*Math.PI);
         }
     }
 
@@ -139,5 +139,9 @@ public class ObstacleAnimator {
         for (int i = 0; i < obstacles.length; i++) {
             obstacles[i].setTranslationY(initialYPositions[i]);
         }
+        difficulty = 0;
+        obstacle_probs = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        kite_movements = new double[]{0d, Math.PI / 2, Math.PI, 3 * Math.PI / 2};
+        obstacle_indexes = new int[]{0, 0, 0, 0};
     }
 }
