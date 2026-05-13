@@ -389,7 +389,19 @@
             app:layout_constraintVertical_bias="0.508"
             app:shapeAppearanceOverlay="@style/Circular" />
 
-
+        <ImageView
+            android:id="@+id/newHighScore"
+            android:layout_width="189dp"
+            android:layout_height="204dp"
+            android:rotation="-25"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/restartButton"
+            app:layout_constraintEnd_toStartOf="@+id/scoreboardScores"
+            app:layout_constraintHorizontal_bias="0.345"
+            app:layout_constraintStart_toStartOf="@+id/victoryView"
+            app:layout_constraintTop_toBottomOf="@+id/scoreboardText"
+            app:layout_constraintVertical_bias="0.0"
+            app:srcCompat="@drawable/highscore" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

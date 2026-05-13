@@ -81,6 +81,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private ConstraintLayout pauseMenu;
     private ImageButton pauseButton;
     private ImageButton infoButton;
+    private ImageView newHighScoreImage;
 
     private Vibrator vib;
 
@@ -107,6 +108,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private boolean game_over = false;
     private boolean game_paused = false;
     private boolean post_highScore = false;
+    private boolean newHighScore = false;
     private long start_time = 0;
     private long highScoreTime = 0;
 
@@ -192,6 +194,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         finalScoreText = findViewById(R.id.timeText);
         scoreboardScoresText = findViewById(R.id.scoreboardScores);
         victoryMenu = findViewById(R.id.victoryMenuConstraint);
+        newHighScoreImage = findViewById(R.id.newHighScore);
         pauseMenu = findViewById(R.id.pauseMenuConstraint);
         instructionsMenu = findViewById(R.id.instructionsMenuConstraint);
 
@@ -358,6 +361,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                     highScore_view.setVisibility(View.VISIBLE);
                     crown.setVisibility(View.VISIBLE);
                     highScoreTime = instanceTime;
+                    newHighScore = true;
                     YoYo.with(Techniques.Tada)
                             .duration(1000)
                             .repeat(1)
@@ -381,6 +385,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 post_highScore = false;
                 scoreboardScoresText.setText(scoreManager.getHighScores());
                 victoryMenu.setVisibility(View.VISIBLE);
+                if (newHighScore) {
+                    newHighScoreImage.setVisibility(View.VISIBLE);
+                }
             }
         }
     }
@@ -495,6 +502,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         countDownText.setVisibility(View.GONE);
 
         victoryMenu.setVisibility(View.GONE);
+        if (newHighScore) {
+            newHighScoreImage.setVisibility(View.GONE);
+            newHighScore = false;
+        }
         throw_instruction_view.setVisibility(View.VISIBLE);
         pauseButton.setVisibility(ImageButton.VISIBLE);
         infoButton.setVisibility(View.VISIBLE);
