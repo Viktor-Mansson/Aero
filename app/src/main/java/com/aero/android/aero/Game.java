@@ -382,7 +382,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                     if (heartAnimator.isCollision(plane_view) && health != 0) {
                         health = Math.min(health + 1, 3);
                         last_heart_shake = true;
-                        heartShakeAnimation.stop();
+                        if(heartShakeAnimation != null) {
+                            heartShakeAnimation.stop();
+                        }
                         soundPool.play(heartSound, 1, 1, 0, 0, 1);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             vib.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1));
@@ -426,6 +428,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 victoryMenu.setVisibility(View.VISIBLE);
                 if (newHighScore) {
                     newHighScoreImage.setVisibility(View.VISIBLE);
+                    findViewById(R.id.sadSmiley).setVisibility(View.GONE);
                 }
             }
         }
@@ -508,7 +511,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
     private void handle_score_checkpoints() {
         long score = scoreManager.getScore();
-        if (score == 3000L || score == 6000L || score == 9000L) {
+        if (score == 2000L || score == 4000L || score == 6000L) {
             obstacleAnimator.increaseRange();
         }
     }
@@ -550,8 +553,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         victoryMenu.setVisibility(View.GONE);
         if (newHighScore) {
             newHighScoreImage.setVisibility(View.GONE);
+            findViewById(R.id.sadSmiley).setVisibility(View.VISIBLE);
             newHighScore = false;
         }
+
         throw_instruction_view.setVisibility(View.VISIBLE);
         pauseButton.setVisibility(ImageButton.VISIBLE);
         infoButton.setVisibility(View.VISIBLE);

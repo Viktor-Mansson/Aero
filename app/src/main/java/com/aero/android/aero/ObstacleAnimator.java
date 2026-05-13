@@ -138,6 +138,9 @@ public class ObstacleAnimator {
     public void resetObstacles() {
         for (int i = 0; i < obstacles.length; i++) {
             obstacles[i].setTranslationY(initialYPositions[i]);
+            obstacles[i].setImageResource(R.drawable.bird);
+            obstacles[i].setScaleY(1f);
+            obstacles[i].setScaleX(1f);
         }
         difficulty = 0;
         obstacle_probs = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
