@@ -12,6 +12,7 @@ public class HeartAnimator {
     private final float initialYPosition;
     private final ConstraintLayout layout;
     private float heart_speed = 5f;
+    private float scaler = 0f;
 
 
     public HeartAnimator(ImageView h, ConstraintLayout l) {
@@ -50,6 +51,9 @@ public class HeartAnimator {
     public void animateHeart(long score) {
         heart_speed = 5f + score * 0.0005f;
         heart.setTranslationY(heart.getTranslationY() + heart_speed);
+        scaler = (float) ((scaler + 0.1f) % (2*Math.PI));
+        heart.setScaleX((float) (Math.sin(scaler)/4f + 1f));
+        heart.setScaleY((float) (Math.sin(scaler)/4f + 1f));
         checkBoundary(heart);
     }
 
