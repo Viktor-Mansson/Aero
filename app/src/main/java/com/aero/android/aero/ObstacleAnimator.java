@@ -1,17 +1,23 @@
 package com.aero.android.aero;
 
 import android.graphics.Rect;
-import android.media.Image;
 import android.view.View;
 import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import java.util.Random;
+
 public class ObstacleAnimator {
     private final ImageView[] obstacles;
     private final float[] initialYPositions;
     private final ConstraintLayout layout;
-    private float obstacle_speed = 8f;
+    private final Random r = new Random();
+    private final float[] obstacle_speeds = {8f, 13f, 6f, 8f};
+    private int[] obstacle_indexes = {0,0,0,0};
+    private int[] obstacle_probs = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    private int difficulty = 0;
+    private double[] kite_movements = {0d, Math.PI/2, Math.PI, 3*Math.PI/2};
 
 
     public ObstacleAnimator(ImageView[] c, ConstraintLayout l) {
@@ -55,21 +61,78 @@ public class ObstacleAnimator {
     }
 
     public void animateObstacles(long score) {
-        obstacle_speed = 8f + score * 0.001f;
-        for (ImageView cloud: obstacles) {
-            cloud.setTranslationY(cloud.getTranslationY() + obstacle_speed);
-            checkBoundary(cloud);
+        int index = 0;
+        for (ImageView obstacle: obstacles) {
+            obstacle.setTranslationY(obstacle.getTranslationY() + obstacle_speeds[obstacle_indexes[index]] + score * 0.001f);
+            checkBoundary(obstacle, index);
+            if (obstacle_indexes[index] == 3) {
+                obstacle.setTranslationX(obstacle.getTranslationX() + (float)(6*Math.sin(kite_movements[index])));
+            }
+            index += 1;
         }
+        handle_kite_states();
     }
 
-    private void checkBoundary(ImageView obstacle) {
+    private void checkBoundary(ImageView obstacle, int index) {
         if (obstacle.getTranslationY() > layout.getHeight()) {
             obstacle.setTranslationY(obstacle.getTranslationY() - layout.getHeight() - obstacle.getHeight());
-
             float maxX = layout.getWidth() - obstacle.getWidth();
             obstacle.setX((float) (Math.random() * maxX));
+            //Code to change enemy type
+            //int idx = r.nextInt(obstacle_range);
+            int idx = obstacle_probs[(int)(Math.random() * obstacle_probs.length)];
+            switch (idx) {
+                case 0:
+                    obstacle.setImageResource(R.drawable.bird);
+                    obstacle.setScaleX(1f);
+                    obstacle.setScaleY(1f);
+                    break;
+                case 1:
+                    obstacle.setImageResource(R.drawable.bird2);
+                    obstacle.setScaleX(0.7f);
+                    obstacle.setScaleY(0.7f);
+                    break;
+                case 2:
+                    obstacle.setImageResource(R.drawable.bird3);
+                    obstacle.setScaleX(1.2f);
+                    obstacle.setScaleY(1.2f);
+                    break;
+                case 3:
+                    obstacle.setImageResource(R.drawable.kite);
+                    obstacle.setScaleX(1f);
+                    obstacle.setScaleY(1f);
+                    break;
+            }
+            obstacle_indexes[index] = idx;
         }
 
+    }
+
+    public void increaseRange() {
+        switch (difficulty) {
+            case 0:
+                for (int i = 0; i < 6; i++) {
+                    obstacle_probs[i] = 1;
+                }
+                break;
+            case 1:
+                for (int i = 4; i < 8; i++) {
+                    obstacle_probs[i] = 2;
+                }
+                break;
+            case 2:
+                for (int i = 7; i < 10; i++) {
+                    obstacle_probs[i] = 3;
+                }
+                break;
+        }
+        difficulty += 1;
+    }
+
+    private void handle_kite_states() {
+        for (int i = 0; i < kite_movements.length; i++) {
+            kite_movements[i] = kite_movements[i] + 0.03;
+        }
     }
 
     public void resetObstacles() {

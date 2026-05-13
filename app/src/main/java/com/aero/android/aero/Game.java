@@ -324,7 +324,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 if(instanceTime > 7800) { //delays birds and hearts
                     scoreManager.addScore(1L);
                     handle_plane_tilt(x_value);
-
+                    handle_score_checkpoints();
 
                     obstacleAnimator.animateObstacles(scoreManager.getScore());
                     heartAnimator.animateHeart(scoreManager.getScore());
@@ -463,6 +463,12 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         constraintSet.applyTo(layout);
     }
 
+    private void handle_score_checkpoints() {
+        long score = scoreManager.getScore();
+        if (score == 3000L || score == 6000L || score == 9000L) {
+            obstacleAnimator.increaseRange();
+        }
+    }
 
     private void resetGame() {
         mediaPlayer.start();

@@ -104,40 +104,40 @@
         android:id="@+id/obstacle2"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:translationY="-1300dp"
+        android:translationY="-1280dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.36"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/bird2" />
+        app:srcCompat="@drawable/bird" />
 
     <ImageView
         android:id="@+id/obstacle3"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:translationY="-1600dp"
+        android:translationY="-1560dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.36"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/kite" />
+        app:srcCompat="@drawable/bird" />
 
     <ImageView
         android:id="@+id/obstacle4"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:translationY="-1900dp"
+        android:translationY="-1840dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.36"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/bird3" />
+        app:srcCompat="@drawable/bird" />
 
     <ImageView
         android:id="@+id/heart"
