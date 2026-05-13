@@ -226,6 +226,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 cancelCountdown();
                 pauseMenu.setVisibility(View.VISIBLE);
                 pauseButton.setVisibility(View.GONE);
+                infoButton.setVisibility(View.GONE);
                 if (!game_started) {
                     throw_instruction_view.setVisibility(TextView.GONE);
                 } else {
@@ -242,6 +243,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         resumeButton.setOnClickListener(v -> {
             pauseMenu.setVisibility(View.GONE);
             pauseButton.setVisibility(View.VISIBLE);
+            infoButton.setVisibility(View.VISIBLE);
             game_paused = false;
             if (!game_started) {
                 throw_instruction_view.setVisibility(TextView.VISIBLE);
@@ -533,6 +535,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         heart3.setVisibility(View.VISIBLE);
         deadHearts.clear();
         scoreManager.addScore(0L);
+        heartShakeAnimation.stop();
 
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layout);
