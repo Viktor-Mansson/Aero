@@ -15,6 +15,9 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.view.animation.Animation;
 import android.media.Image;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
@@ -113,6 +116,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private boolean startAnimationDone = false;
     private boolean last_heart_shake = true;
     private boolean newHighScore = false;
+    private boolean hasShownInstructions = false;
     private long start_time = 0;
     private long highScoreTime = 0;
     private YoYo.YoYoString heartShakeAnimation;
@@ -151,7 +155,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 .build();
         soundPool = new SoundPool.Builder().setMaxStreams(3).setAudioAttributes(audioAttributes).build();
 
-
+        mediaPlayer = MediaPlayer.create(this, R.raw.background_music);
+        mediaPlayer.setLooping(true);
+        mediaPlayer.seekTo(0);
+        mediaPlayer.start();
 
         birdSound = soundPool.load(this,R.raw.hurt2,1);
         swooshSound = soundPool.load(this,R.raw.swoosh,1);
@@ -222,7 +229,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             startActivity(intent);
         });
         pauseButton = findViewById(R.id.pauseButton);
-        pauseButton.setAlpha(0f);
         pauseButton.setOnClickListener(v -> {
             if (!game_paused) {
                 game_paused = true;
@@ -260,13 +266,25 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         });
 
         // show instructions if game is played for the first time
-        if (!game_started && scoreManager.hasNoScores()) {
+        if (!game_started && scoreManager.hasNoScores() && !hasShownInstructions) {
             showInstructions();
+        }
+
+        //Hides system bar for the phone
+        WindowInsetsController controller = getWindow().getInsetsController();
+        if (controller != null) {
+            // Hide both the status bar (top) and navigation bar (bottom)
+            controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+
+            // This is the "magic" line: it makes the bars only appear
+            // with a swipe, and they'll fade away automatically.
+            controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         }
     }
 
     void showInstructions() {
         game_paused = true;
+        hasShownInstructions = true;
         pauseButton.setVisibility(View.GONE);
         infoButton.setVisibility(View.GONE);
         instructionsMenu.setVisibility(View.VISIBLE);
@@ -280,10 +298,11 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         });
 
         //Hide Status & Navigation Bar https://developer.android.com/training/system-ui/status
-        View decorView = getWindow().getDecorView();
+        /*View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
+        decorView.setSystemUiVisibility(uiOptions);*/
+
     }
     @Override
     protected void onPause() {
@@ -325,7 +344,6 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 z_value = z_value - gravity[2];
 
                 handle_throw(x_value, y_value, z_value);
-                soundPool.play(swooshSound, 1, 1, 0,0, 1);
             } else if (instanceTime > 0 && health > 0) { //The game has now started and this part handles that, makes the cloud start directly
                 backgroundAnimator.animateClouds(scoreManager.getScore());
 
@@ -445,11 +463,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         //the end of the throw
         else if (Math.sqrt(x_prev*x_prev + y_prev*y_prev + z_prev*z_prev) > FORCE_THRESHHOLD) {
             //point gain for force
-            pauseButton.setVisibility(ImageButton.GONE);
             game_started = true;
+            infoButton.setVisibility(ImageButton.GONE);
             start_time = System.currentTimeMillis();
-            throw_instruction_view.setVisibility(TextView.GONE);
-            infoButton.setVisibility(View.GONE);
             scoreManager = new ScoreManager(this, (int) (Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max)*10), score_view);
             backgroundAnimator = new BackgroundAnimator(clouds, layout);
             obstacleAnimator = new ObstacleAnimator(obstacles, layout);
@@ -465,6 +481,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         int startValue = 0;
         int endValue = (int) scoreManager.getScore();
 
+        soundPool.play(swooshSound, 1, 1, 0,0, 1);
         ValueAnimator animator = ValueAnimator.ofInt(startValue, endValue);
         animator.setDuration(3000); // 1.5 seconds
         animator.setInterpolator(new DecelerateInterpolator());
