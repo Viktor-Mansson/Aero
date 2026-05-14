@@ -3,8 +3,10 @@ package com.aero.android.aero;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.hardware.Sensor;
@@ -18,6 +20,8 @@ import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
@@ -35,6 +39,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -42,7 +47,9 @@ import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -66,17 +73,21 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private ImageView plane_view, heart1, heart2, heart3, crown, parkBackground, talkBubble;
     private ConstraintLayout layout;
     private ImageView[] clouds;
-    private ImageButton pauseButton;
 
     private Deque<ImageView> deadHearts = new ArrayDeque<ImageView>();
     private Deque<ImageView> aliveHearts = new ArrayDeque<ImageView>();
     private ImageView heart;
+    private View hitScreen;
 
     private ImageView[] obstacles;
     private TextView finalScoreText;
     private TextView scoreboardScoresText;
     private ConstraintLayout victoryMenu;
+    private ConstraintLayout instructionsMenu;
     private ConstraintLayout pauseMenu;
+    private ImageButton pauseButton;
+    private ImageButton infoButton;
+    private ImageView newHighScoreImage;
 
     private Vibrator vib;
 
@@ -100,8 +111,11 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     private boolean game_paused = false;
     private boolean post_highScore = false;
     private boolean startAnimationDone = false;
+    private boolean last_heart_shake = true;
+    private boolean newHighScore = false;
     private long start_time = 0;
     private long highScoreTime = 0;
+    private YoYo.YoYoString heartShakeAnimation;
 
     private int health = 3;
 
@@ -132,18 +146,11 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
         // Sets up soundpool for sound effects.
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_GAME) // Groups it with game/media volume
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .build();
-        soundPool = new SoundPool.Builder()
-                .setMaxStreams(5)
-                .setAudioAttributes(audioAttributes)
-                .build();
+        soundPool = new SoundPool.Builder().setMaxStreams(3).setAudioAttributes(audioAttributes).build();
 
-        //Initiates background music and sets it to be looping
-        mediaPlayer = MediaPlayer.create(this, R.raw.background_music);
-        mediaPlayer.setLooping(true);
-        mediaPlayer.seekTo(0);
 
 
         birdSound = soundPool.load(this,R.raw.hurt2,1);
@@ -157,6 +164,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         vib = this.getSystemService(Vibrator.class);
 
         //xml refrences
+        hitScreen = findViewById(R.id.hitscreen);
         score_view = findViewById(R.id.score);
         highScore_view = findViewById(R.id.highScore);
         highScore_view.setVisibility(View.GONE);
@@ -190,7 +198,11 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         finalScoreText = findViewById(R.id.timeText);
         scoreboardScoresText = findViewById(R.id.scoreboardScores);
         victoryMenu = findViewById(R.id.victoryMenuConstraint);
+        newHighScoreImage = findViewById(R.id.newHighScore);
         pauseMenu = findViewById(R.id.pauseMenuConstraint);
+        instructionsMenu = findViewById(R.id.instructionsMenuConstraint);
+
+        scoreManager = new ScoreManager(this, 0, score_view);
 
         //settings alphas for intro transition
         heart1.setAlpha(0f);
@@ -216,8 +228,11 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 game_paused = true;
                 pauseMenu.setVisibility(View.VISIBLE);
                 pauseButton.setVisibility(View.GONE);
+                infoButton.setVisibility(View.GONE);
                 if (!game_started) {
                     throw_instruction_view.setVisibility(TextView.GONE);
+                } else {
+                    mediaPlayer.pause();
                 }
             }
         });
@@ -230,10 +245,38 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         resumeButton.setOnClickListener(v -> {
             pauseMenu.setVisibility(View.GONE);
             pauseButton.setVisibility(View.VISIBLE);
+            infoButton.setVisibility(View.VISIBLE);
             game_paused = false;
             if (!game_started) {
                 throw_instruction_view.setVisibility(TextView.VISIBLE);
+            } else {
+                mediaPlayer.start();
             }
+        });
+
+        infoButton = findViewById(R.id.infoButton);
+        infoButton.setOnClickListener(v -> {
+            showInstructions();
+        });
+
+        // show instructions if game is played for the first time
+        if (!game_started && scoreManager.hasNoScores()) {
+            showInstructions();
+        }
+    }
+
+    void showInstructions() {
+        game_paused = true;
+        pauseButton.setVisibility(View.GONE);
+        infoButton.setVisibility(View.GONE);
+        instructionsMenu.setVisibility(View.VISIBLE);
+
+        Button closeInstructionsButton = findViewById(R.id.homeButtonInstructions);
+        closeInstructionsButton.setOnClickListener(v2 -> {
+            pauseButton.setVisibility(View.VISIBLE);
+            infoButton.setVisibility(View.VISIBLE);
+            instructionsMenu.setVisibility(View.GONE);
+            game_paused = false;
         });
 
         //Hide Status & Navigation Bar https://developer.android.com/training/system-ui/status
@@ -290,35 +333,64 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                     scoreManager.addScore(1L);
                     mediaPlayer.start();
                     handle_plane_tilt(x_value);
+                    handle_score_checkpoints();
 
                     obstacleAnimator.animateObstacles(scoreManager.getScore());
                     heartAnimator.animateHeart(scoreManager.getScore());
 
-                }
-
-
-                if (obstacleAnimator.isCollision(plane_view)) {
-                    health -=1;
-                    soundPool.play(birdSound,1,1,0,0,1);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vib.vibrate(VibrationEffect.createOneShot(150,250));
-
+                    if(aliveHearts.size() == 1 && last_heart_shake) {
+                        ImageView heart = aliveHearts.peek();
+                        heartShakeAnimation = YoYo.with(Techniques.Shake)
+                                .duration(1000)
+                                .repeat(Animation.INFINITE)
+                                .playOn(heart);
+                        last_heart_shake = false;
                     }
-                    ImageView heart = aliveHearts.pop();
-                    heart.setVisibility(View.GONE); // takes away a heart when collision
-                    deadHearts.addFirst(heart); //adds the heart to a deadstack that hearts can be taken from when flying into one
-                }
 
-                if (heartAnimator.isCollision(plane_view) && health != 0) {
-                    health = Math.min(health + 1, 3);
-                    soundPool.play(heartSound,1,1,0,0,1);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vib.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1));
+                    if (obstacleAnimator.isCollision(plane_view)) {
+
+                        hitScreen.animate().withStartAction(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        hitScreen.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                        ).setDuration(50).withEndAction(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        hitScreen.setVisibility(View.GONE);
+                                    }
+                                }
+                        ).start();
+
+                        health -= 1;
+                        soundPool.play(birdSound, 1, 1, 0, 0, 1);
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vib.vibrate(VibrationEffect.createOneShot(100, 180));
+                        }
+                        ImageView heart = aliveHearts.pop();
+                        heart.setVisibility(View.GONE); // takes away a heart when collision
+                        deadHearts.addFirst(heart); //adds the heart to a deadstack that hearts can be taken from when flying into one
                     }
-                    if (!deadHearts.isEmpty()) {
-                        ImageView heart = deadHearts.pop();
-                        heart.setVisibility(View.VISIBLE);
-                        aliveHearts.addFirst(heart);
+
+                    if (heartAnimator.isCollision(plane_view) && health != 0) {
+                        health = Math.min(health + 1, 3);
+                        last_heart_shake = true;
+                        if(heartShakeAnimation != null) {
+                            heartShakeAnimation.stop();
+                        }
+                        soundPool.play(heartSound, 1, 1, 0, 0, 1);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vib.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1));
+                        }
+                        if (!deadHearts.isEmpty()) {
+                            ImageView heart = deadHearts.pop();
+                            heart.setVisibility(View.VISIBLE);
+                            aliveHearts.addFirst(heart);
+                        }
                     }
                 }
                 if(scoreManager.checkHighScore() && !post_highScore) {
@@ -327,6 +399,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                     highScore_view.setVisibility(View.VISIBLE);
                     crown.setVisibility(View.VISIBLE);
                     highScoreTime = instanceTime;
+                    newHighScore = true;
                     YoYo.with(Techniques.Tada)
                             .duration(1000)
                             .repeat(1)
@@ -339,6 +412,8 @@ public class Game extends AppCompatActivity implements SensorEventListener {
 
             } else if ( health == 0 && !game_over) {
                 game_over = true;
+                pauseButton.setVisibility(ImageButton.GONE);
+                mediaPlayer.stop();
                 soundPool.play(loseSound,1,1,0,0,1);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     vib.vibrate(VibrationEffect.createOneShot(500,250));
@@ -348,6 +423,10 @@ public class Game extends AppCompatActivity implements SensorEventListener {
                 post_highScore = false;
                 scoreboardScoresText.setText(scoreManager.getHighScores());
                 victoryMenu.setVisibility(View.VISIBLE);
+                if (newHighScore) {
+                    newHighScoreImage.setVisibility(View.VISIBLE);
+                    findViewById(R.id.sadSmiley).setVisibility(View.GONE);
+                }
             }
         }
     }
@@ -366,8 +445,11 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         //the end of the throw
         else if (Math.sqrt(x_prev*x_prev + y_prev*y_prev + z_prev*z_prev) > FORCE_THRESHHOLD) {
             //point gain for force
+            pauseButton.setVisibility(ImageButton.GONE);
             game_started = true;
             start_time = System.currentTimeMillis();
+            throw_instruction_view.setVisibility(TextView.GONE);
+            infoButton.setVisibility(View.GONE);
             scoreManager = new ScoreManager(this, (int) (Math.sqrt(x_max*x_max + y_max*y_max + z_max*z_max)*10), score_view);
             backgroundAnimator = new BackgroundAnimator(clouds, layout);
             obstacleAnimator = new ObstacleAnimator(obstacles, layout);
@@ -463,8 +545,15 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         constraintSet.applyTo(layout);
     }
 
+    private void handle_score_checkpoints() {
+        long score = scoreManager.getScore();
+        if (score == 2000L || score == 4000L || score == 6000L) {
+            obstacleAnimator.increaseRange();
+        }
+    }
 
     private void resetGame() {
+        mediaPlayer.start();
         gravity = new float[3];
         x_prev = 0f;
         y_prev = 0f;
@@ -485,6 +574,7 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         heart3.setVisibility(View.VISIBLE);
         deadHearts.clear();
         scoreManager.addScore(0L);
+        heartShakeAnimation.stop();
 
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layout);
@@ -498,5 +588,14 @@ public class Game extends AppCompatActivity implements SensorEventListener {
         victoryMenu.setVisibility(View.GONE);
         throw_instruction_view.setAlpha(1f);
         talkBubble.setAlpha(1f);
+        if (newHighScore) {
+            newHighScoreImage.setVisibility(View.GONE);
+            findViewById(R.id.sadSmiley).setVisibility(View.VISIBLE);
+            newHighScore = false;
+        }
+
+        throw_instruction_view.setVisibility(View.VISIBLE);
+        pauseButton.setVisibility(ImageButton.VISIBLE);
+        infoButton.setVisibility(View.VISIBLE);
     }
 }
