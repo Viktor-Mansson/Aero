@@ -570,6 +570,9 @@ public class Game extends AppCompatActivity implements SensorEventListener {
     }
 
     private void resetGame() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.background_music);
+        mediaPlayer.setLooping(true);
+        mediaPlayer.seekTo(0);
         mediaPlayer.start();
         gravity = new float[3];
         x_prev = 0f;
