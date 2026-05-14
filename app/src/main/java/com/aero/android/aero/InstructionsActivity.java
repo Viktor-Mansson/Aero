@@ -3,6 +3,7 @@ package com.aero.android.aero;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,7 +24,7 @@ public class InstructionsActivity extends AppCompatActivity {
             return insets;
         });
 
-        Button homeButton = findViewById(R.id.homeButtonInstructions);
+        ImageButton homeButton = findViewById(R.id.homeButtonInstructions);
         homeButton.setOnClickListener(v -> {
             Intent intent = new Intent(InstructionsActivity.this, MainActivity.class);
             startActivity(intent);

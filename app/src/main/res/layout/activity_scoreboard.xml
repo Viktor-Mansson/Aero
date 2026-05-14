@@ -21,22 +21,22 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/whiteboard" />
 
-    <Button
+    <ImageButton
         android:id="@+id/homeButtonScoreboard"
-        android:layout_width="89dp"
-        android:layout_height="70dp"
-        android:text="Go back"
-        android:textSize="15sp"
-        app:backgroundTint="@color/eggwhite"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/egg_white_button"
+        android:scaleType="centerInside"
+        android:src="@drawable/back_arrow"
+        android:padding="10dp"
+        android:contentDescription="Back"
+
         app:layout_constraintBottom_toBottomOf="@+id/victoryView"
         app:layout_constraintEnd_toEndOf="@+id/victoryView"
         app:layout_constraintHorizontal_bias="0.1"
         app:layout_constraintStart_toStartOf="@+id/victoryView"
         app:layout_constraintTop_toTopOf="@+id/victoryView"
-        app:layout_constraintVertical_bias="0.042"
-        app:shapeAppearanceOverlay="@style/Circular"
-        app:strokeColor="#000000"
-        app:strokeWidth="2dp" />
+        app:layout_constraintVertical_bias="0.042" />
 
     <TextView
         android:id="@+id/scoreboardText"

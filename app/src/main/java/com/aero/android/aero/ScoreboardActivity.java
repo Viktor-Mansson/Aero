@@ -3,6 +3,7 @@ package com.aero.android.aero;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -23,7 +24,7 @@ public class ScoreboardActivity extends AppCompatActivity {
             return insets;
         });
 
-        Button homeButton = findViewById(R.id.homeButtonScoreboard);
+        ImageButton homeButton = findViewById(R.id.homeButtonScoreboard);
         homeButton.setOnClickListener(v -> {
             Intent intent = new Intent(ScoreboardActivity.this, MainActivity.class);
             startActivity(intent);
