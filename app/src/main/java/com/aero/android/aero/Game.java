@@ -270,14 +270,12 @@ public class Game extends AppCompatActivity implements SensorEventListener {
             showInstructions();
         }
 
-        //Hides system bar for the phone
+        //Hides system bars for the phone
         WindowInsetsController controller = getWindow().getInsetsController();
         if (controller != null) {
-            // Hide both the status bar (top) and navigation bar (bottom)
+            //Hide both bars
             controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-
-            // This is the "magic" line: it makes the bars only appear
-            // with a swipe, and they'll fade away automatically.
+            //swipe to show the bar
             controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         }
     }
